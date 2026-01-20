@@ -13,6 +13,7 @@ public class TurnBar {
     public TurnBar () throws IOException {
         turnLabel = new JLabel(new ImageIcon(ImageIO.read((new File("images\\noTurnBar.png").toURI()).toURL())));
         turnBar = new JPanel();
+
         turnBar.add(turnLabel);
     }
 

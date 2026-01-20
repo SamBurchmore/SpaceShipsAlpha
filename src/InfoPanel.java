@@ -1,43 +1,58 @@
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 public class InfoPanel {
 
     private JLabel armourLabel;
     private JLabel attackScoreLabel;
+    private JLabel attackRangeLabel;
     private JLabel attackLabel;
     private JLabel pieceLabel;
-    private JLabel damagedLabel;
+    private JLabel objectiveLabel;
     private JPanel infoPanel;
 
-    public InfoPanel() {
+    public InfoPanel() throws IOException {
         armourLabel = new JLabel();
         attackScoreLabel = new JLabel();
+        attackRangeLabel = new JLabel();
         attackLabel = new JLabel();
         pieceLabel = new JLabel();
-        damagedLabel = new JLabel();
+        objectiveLabel = new JLabel();
         infoPanel = new JPanel();
-        infoPanel.setBackground(new Color(200, 200, 200));
+        infoPanel.setLayout(new GridLayout(6, 1));
+        infoPanel.setBackground(new Color(220, 220, 220));
+        objectiveLabel.setText("<html><br/>[OBJECTIVE]: Destroy Enemy Battleship</html>");
+//        for (int i = 0; i < 6; i++) {
+//            JLabel label = new JLabel();
+//            label.setForeground(new Color(i*12, i*12, i));
+//            label.setText("[]");
+//            infoPanel.add(label);
+//        }
+        infoPanel.add(objectiveLabel);
         infoPanel.add(pieceLabel);
         infoPanel.add(armourLabel);
         infoPanel.add(attackScoreLabel);
+        infoPanel.add(attackRangeLabel);
         infoPanel.add(attackLabel);
-        //infoPanel.add(damagedLabel);
+//        BufferedImage myPicture = ImageIO.read(new File("images\\big_destroyer.png"));
+//        JLabel picLabel = new JLabel(new ImageIcon(myPicture));
+//        infoPanel.add(picLabel);
     }
 
 
     public void setInfoPanelText(Piece piece) {
         armourLabel.setText("Armour: " +piece.getArmour());
         armourLabel.setForeground(Color.BLACK);
-        attackScoreLabel.setText("Attack: " + piece.getAttack());
+        attackScoreLabel.setText("Attack Score: " + piece.getAttack());
+        attackRangeLabel.setText("Attack Range: " + piece.getAttackRange());
         pieceLabel.setText(String.valueOf(piece.getType()));
         if (piece.getDamaged()) {
-            damagedLabel.setText("!!! DAMAGED !!!");
             armourLabel.setText("Armour: " + piece.getArmour()/2 + "/" + piece.getArmour());
             armourLabel.setForeground(Color.RED);
-        }
-        else {
-            damagedLabel.setText(" ");
         }
         attackLabel.setText(" ");
     }
@@ -45,8 +60,8 @@ public class InfoPanel {
     public void clearInfoPanelText() {
         armourLabel.setText(" ");
         attackScoreLabel.setText(" ");
+        attackRangeLabel.setText(" ");
         pieceLabel.setText(" ");
-        damagedLabel.setText(" ");
     }
 
     public void setAttackResult(Piece attacker, Piece defender, int attackScore, boolean result, boolean damaged) {

@@ -10,150 +10,141 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
+//import com.kong.unirest;
 
 public class MainController {
-    GameView gameView = new GameView();
-    BoardController boardController = new BoardController();
-    Tile lastClickedTile;
-    Piece activePiece;
-    Team activeTeam;
-    HashMap<int[], int[]> pointMap = new HashMap<>();
-    private HashMap<SpriteTags, BufferedImage> sprites = new HashMap<>();
-    private final BufferedImage blankBoardImage;
-    private BufferedImage lastBoardImage;
-    private BoardView boardView;
-    private GameLogic gameLogic;
-
+    private final GameView gameView;
+    private final BoardController boardController;
+    private final BoardImage boardImage;
+    private final BoardLogic boardLogic;
+    private final PlayLogic playLogic;
+    private Tile lastClickedTile;
+    private Piece activePiece;
+    private Team activeTeam;
     private ArrayList<Tile> moveTiles;
     private ArrayList<Tile> attackTiles;
-
     public GameState gameState;
-
-    public int[] attackResult;
-
-    private BoardListener boardListener;
 
     private Color lightMoveColor = new Color(122, 122, 222);
     private Color darkMoveColor = new Color(14, 14, 94);
     private Color lightAttackColor = new Color(150, 0, 0);
     private Color darkAttackColor = new Color(200, 0, 0);
-    private Color lightDamagedColor = new Color(200, 200, 0);
-    private Color darkDamagedColor = new Color(150, 150, 0);
-
-
+    private Color tileLightColor = new Color(50, 200, 20);
+    private Color tileDarkColor = new Color(30, 150, 0);
 
     public MainController() throws IOException {
-        boardView = new BoardView();
-        gameLogic = new GameLogic();
-        boardListener = new BoardListener();
+
+        gameView = new GameView();
+        boardController  = new BoardController(tileLightColor, tileDarkColor);
+        boardController.getBoard().setDarkColor(tileDarkColor);
+        boardController.getBoard().setLightColor(tileLightColor);
+        boardImage = new BoardImage();
+        boardLogic = new BoardLogic();
+        playLogic = new PlayLogic();
         moveTiles = new ArrayList<>();
         attackTiles = new ArrayList<>();
-        boardView.loadSprites();
-        blankBoardImage = boardView.scaledImage();
-        lastBoardImage = BoardView.deepCopy(blankBoardImage);
-        gameView.updateBoard(boardView.getBoardImage());
+        boardImage.updateBoard();
         gameView.setVisible(true);
-        gameView.getGameFrame().addMouseListener(boardListener);
-        gameView.getSidePanel().getUpButton().addActionListener(e -> gameLogic.setNorth());
-        gameView.getSidePanel().getDownButton().addActionListener(e -> gameLogic.setSouth());
-        gameView.getSidePanel().getRightButton().addActionListener(e -> gameLogic.setEast());
-        gameView.getSidePanel().getLeftButton().addActionListener(e -> gameLogic.setWest());
+        gameView.getGameFrame().addMouseListener(playLogic);
         activeTeam = Team.BLACK;
         gameView.getSidePanel().changeTurnDisplay(activeTeam);
+
     }
 
-    public void setLastClickedTile(int x, int y) {
-        lastClickedTile = boardController.getBoard().getTile((x-7) / boardController.getScale(), (y-30) / boardController.getScale());
-        //System.out.println((x-7) / boardController.getScale() + " " + (y-30) / boardController.getScale());
-    }
+    // Groups methods which allow the game to be played .i.e control the game state, listen for input, send it to BoardLogic, update BoardImage and send the image to GameView
+    public class PlayLogic implements java.awt.event.MouseListener {
 
-    public boolean setActivePiece() {
-        if (lastClickedTile.getPiece() != null) {
-            if (lastClickedTile.getPiece().getTeam() == activeTeam) {
-                activePiece = lastClickedTile.getPiece();
-                //System.out.println(activePiece.getType());
-                //System.out.println(Arrays.toString(activePiece.getLocation()));
-                gameView.getSidePanel().getInfoPanel().setInfoPanelText(activePiece);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public void newTurn() {
-        if (activeTeam == Team.BLACK) {
-            activeTeam = Team.WHITE;
-        }
-        else {
-            activeTeam = Team.BLACK;
-        }
-        activePiece = null;
-        gameState = GameState.WAITING_INPUT;
-        gameView.getSidePanel().getInfoPanel().clearInfoPanelText();
-        boardView.updateBoard();
-    }
-
-    public void resetTurn() {
-        activePiece = null;
-        gameState = GameState.WAITING_INPUT;
-        gameView.getSidePanel().getInfoPanel().clearInfoPanelText();
-        boardView.updateBoard();
-    }
-
-    public void startRotate() {
-        gameState = GameState.PIECE_TURNING;
-        gameLogic.getActivePieceActions(); // Retrieve the active pieces potential actions
-        boardView.displayActions(); // Display the active pieces potential actions
-    }
-
-    public void runGame() {
-        gameView.getSidePanel().getInfoPanel().clearInfoPanelText();
-        System.out.println(gameState);
-        boardListener.getPointer(); // Get the mouse location
-        if (gameState == GameState.PIECE_TURNING) {
-            boolean actionPerformed = gameLogic.performAction();
-            if (actionPerformed) {
-                gameState = GameState.WAITING_INPUT;
-                newTurn();
-            }
-        }
-        else {
-            if (gameState == GameState.WAITING_INPUT) {
-                boolean pieceSelected = setActivePiece(); // Try to set the active piece
-                if (pieceSelected) {
-                    gameState = GameState.PIECE_SELECTED;
-                    gameLogic.getActivePieceActions(); // Retrieve the active pieces potential actions
-                    boardView.displayActions(); // Display the active pieces potential actions
-                }
-            } else if (lastClickedTile.getPiece() != null) {
-                if (activePiece == lastClickedTile.getPiece()) {
-                    resetTurn();
-                } else if (lastClickedTile.getPiece().getTeam() == activeTeam) {
-                    resetTurn();
+        public boolean setActivePiece() {
+            if (lastClickedTile.getPiece() != null) {
+                if (lastClickedTile.getPiece().getTeam() == activeTeam) {
+                    activePiece = lastClickedTile.getPiece();
+                    gameView.getSidePanel().getInfoPanel().setInfoPanelText(activePiece);
+                    return true;
                 }
             }
-            if (gameState == GameState.PIECE_SELECTED) {
-                boolean actionPerformed = gameLogic.performAction();
-                if (actionPerformed) {
-                    System.out.println("action performed");
-                    newTurn();
-                    gameView.getSidePanel().changeTurnDisplay(activeTeam);
-                }
+            return false;
+        }
+
+        public void newTurn() {
+            if (activeTeam == Team.BLACK) {
+                activeTeam = Team.WHITE;
             }
+            else {
+                activeTeam = Team.BLACK;
+            }
+            activePiece = null;
+            gameState = GameState.WAITING_INPUT;
+            gameView.getSidePanel().getInfoPanel().clearInfoPanelText();
+            boardImage.updateBoard();
+        }
+
+        public void resetTurn() {
+            activePiece = null;
+            gameState = GameState.WAITING_INPUT;
+            gameView.getSidePanel().getInfoPanel().clearInfoPanelText();
+            boardImage.updateBoard();
+        }
+
+        public void runGame() {
+            gameView.getSidePanel().getInfoPanel().clearInfoPanelText();
             System.out.println(gameState);
+            playLogic.getPointer(); // Get the mouse location
+            if (gameState == GameState.PIECE_TURNING) {
+                boolean actionPerformed = boardLogic.performAction();
+                if (actionPerformed) {
+                    gameState = GameState.WAITING_INPUT;
+                    newTurn();
+                }
+            }
+            else {
+                if (gameState == GameState.WAITING_INPUT) {
+                    boolean pieceSelected = setActivePiece(); // Try to set the active piece
+                    if (pieceSelected) {
+                        gameState = GameState.PIECE_SELECTED;
+                        boardLogic.getActivePieceActions(); // Retrieve the active pieces potential actions
+                        boardImage.displayActions(); // Display the active pieces potential actions
+                    }
+                } else if (lastClickedTile.getPiece() != null) {
+                    if (activePiece == lastClickedTile.getPiece()) {
+                        resetTurn();
+                    } else if (lastClickedTile.getPiece().getTeam() == activeTeam) {
+                        resetTurn();
+                    }
+                }
+                if (gameState == GameState.PIECE_SELECTED) {
+                    boolean actionPerformed = boardLogic.performAction();
+                    if (actionPerformed) {
+                        System.out.println("action performed");
+                        newTurn();
+                        gameView.getSidePanel().changeTurnDisplay(activeTeam);
+                    }
+                }
+                System.out.println(gameState);
+            }
         }
-    }
+        public void setLastClickedTile(int x, int y) {
+            lastClickedTile = boardController.getBoard().getTile((x-7) / boardController.getScale(), (y-30) / boardController.getScale());
+        }
 
-    public class BoardListener implements java.awt.event.MouseListener {
+        public void getPointer() {
+            Point point = MouseInfo.getPointerInfo().getLocation();
+            SwingUtilities.convertPointFromScreen(point, gameView.getGameFrame());
+            setLastClickedTile(point.x, point.y);
+        }
 
-
-        public BoardListener() {
+        public PlayLogic() {
             gameState = GameState.WAITING_INPUT;
         }
 
         @Override
         public void mouseClicked(MouseEvent e) {
-            runGame();
+            if (SwingUtilities.isRightMouseButton(e))
+            {
+
+            }
+            else {
+                runGame();
+            }
         }
 
         @Override
@@ -176,30 +167,409 @@ public class MainController {
 
         }
 
-        public void getPointer() {
-            Point point = MouseInfo.getPointerInfo().getLocation();
-            SwingUtilities.convertPointFromScreen(point, gameView.getGameFrame());
-            setLastClickedTile(point.x, point.y);
+    }
+
+    // Groups methods which make up board logic
+    public class BoardLogic {
+
+        public void move(Piece piece, Tile tile) {
+            if (piece.getDirection() != null) {
+                piece.setDirection(computeDirection(piece, tile));
+            }
+            int x = tile.getLocation()[0];
+            int y = tile.getLocation()[1];
+            int[] oldLocation = piece.getLocation();
+            boardController.getBoard().setTile(oldLocation[0], oldLocation[1], null);
+            boardController.getBoard().setTile(x, y, piece);
+            piece.setLocation(new int[]{x, y});
         }
+        public ArrayList<Object> attack(Piece attacker, Piece defender) {
+            if (attacker.getDirection() != null) {
+                attacker.setDirection(computeDirection(attacker, defender));
+            }
+            Random random = new Random();
+            int attackScore = 1 + random.nextInt(attacker.getAttack());
+            if (attacker.getType() == PieceType.FRIGATE) {
+                attackScore = 1 + random.nextInt(Math.max(defender.getArmour(), 2));
+            }
+            ArrayList<Object> result = new ArrayList<>();
+            int armour = defender.getArmour();
+            if (defender.getDamaged()) {
+                armour = armour/2;
+            }
+            System.out.println("attack score: " + attackScore + " armour: " + armour);
+            if (attackScore >= armour) {
+                boardController.getBoard().setTile(defender.getLocation()[0], defender.getLocation()[1], null);
+                result.add(defender);
+                result.add(attackScore);
+                result.add(true);
+                result.add(false);
+                return result;
+            }
+            if (!defender.getDamaged()) {
+                if (attacker.getType() == PieceType.FRIGATE || attacker.getType() == PieceType.CRUISER) {
+                    if (attackScore >= defender.getArmour() / 2) {
+                        defender.setDamaged(true);
+                        result.add(defender);
+                        result.add(attackScore);
+                        result.add(true);
+                        result.add(true);
+                        return result;
+                    }
+                }
+            }
+            result.add(defender);
+            result.add(attackScore);
+            result.add(false);
+            result.add(false);
+            return result;
+        }
+        public Direction computeDirection(Piece piece0, Tile tile) {
+            int x = tile.getLocation()[0];
+            int y = tile.getLocation()[1];
+            int x1 = piece0.getLocation()[0];
+            int y1 = piece0.getLocation()[1];
+            return computeDirection(x, y, x1, y1);
+        }
+        public Direction computeDirection(Tile tile0, Tile tile1) {
+            int x = tile0.getLocation()[0];
+            int y = tile0.getLocation()[1];
+            int x1 = tile1.getLocation()[0];
+            int y1 = tile1.getLocation()[1];
+            return computeDirection(x, y, x1, y1);
+        }
+        public Direction computeDirection(Piece piece0, Piece piece1) {
+            int x = piece1.getLocation()[0];
+            int y = piece1.getLocation()[1];
+            int x1 = piece0.getLocation()[0];
+            int y1 = piece0.getLocation()[1];
+            return computeDirection(x, y, x1, y1);
+        }
+        public Direction computeDirection(int x, int y, int x1, int y1) {
+            if(x > x1) {
+                return Direction.EAST;
+            }
+            if (x < x1) {
+                return Direction.WEST;
+            }
+            if(y > y1) {
+                return Direction.SOUTH;
+            }
+            if (y < y1) {
+                return Direction.NORTH;
+            }
+            return null;
+        }
+        public boolean performAction() {
+            for (Tile tile : moveTiles) {
+                if (lastClickedTile.getLocation()[0] == tile.getLocation()[0] && lastClickedTile.getLocation()[1] == tile.getLocation()[1]) {
+                    move(activePiece, lastClickedTile);
+                    return true;
+                }
+            }
+            for (Tile tile : attackTiles) {
+                if (lastClickedTile.getLocation()[0] == tile.getLocation()[0] && lastClickedTile.getLocation()[1] == tile.getLocation()[1]) {
+                    if (tile.getPiece().getTeam() != activePiece.getTeam()) {
+                        ArrayList<Object> result = attack(activePiece, tile.getPiece());
+                        gameView.getSidePanel().getInfoPanel().setAttackResult(activePiece, (Piece) result.get(0), (int) result.get(1), (boolean) result.get(2), (boolean) result.get(3));
+
+                    }
+                    else {
+                        move(activePiece, lastClickedTile);
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+        public void getActivePieceActions() {
+            moveTiles = boardLogic.getMoveTiles(activePiece.getLocation(), activePiece.getMovementRange(), activePiece.getDirection());
+            attackTiles = boardLogic.getAttackTiles(activePiece.getLocation(), activePiece.getAttackRange(), activePiece.getDirection());
+        }
+        public ArrayList<Tile> getMoveTiles(int[] location, int range, Direction direction) {
+                if (direction != null) {
+//                if (boardController.getBoard().getTile(location[0], location[1]).getPiece().getType() == PieceType.FRIGATE) {
+//                    ArrayList<Tile> moveTiles = getMoveTilesSquareRange(location, 1);
+//                    moveTiles.addAll(getMoveTilesLineRange(location, range));
+//                    return moveTiles;
+//                }
+                return getMoveTilesLineRange(location, range);
+            }
+            else {
+                return getMoveTilesSquareRange(location, range);
+            }
+        }
+        public ArrayList<Tile> getAttackTiles(int[] location, int range, Direction direction) {
+            if (direction != null) {
+                return getAttackTilesLineRange(location, range);
+            }
+            else {
+                return getAttackTilesSquareRange(location, range);
+            }
+        }
+        public ArrayList<Tile> getMoveTilesLineRange(int[] location, int range ) {
+            int x = location[0];
+            int y = location[1];
+            ArrayList<Tile> tiles = new ArrayList<>();
+            for (int i = 0; i > -range; i--) {//north
+                y = y - 1;
+                if (((x < boardController.getSize())
+                        && (y < boardController.getSize()))
+                        && ((x >= 0) && (y >= 0))) {
+                    if (boardController.getBoard().getTile(x, y).getPiece() == null) {
+                        tiles.add(boardController.getBoard().getTile(x, y));
+                    }
+                    else if (boardController.getBoard().getTile(x, y).getPiece().getTeam() != activeTeam) {
+                        break;
+                    }
+                }
+            }
+            x = location[0];
+            y = location[1];
+            for (int i = 0; i < range; i++) {//east
+                x = x + 1;
+                if (((x < boardController.getSize())
+                        && (y < boardController.getSize()))
+                        && ((x >= 0) && (y >= 0))) {
+                    if (boardController.getBoard().getTile(x, y).getPiece() == null) {
+                        tiles.add(boardController.getBoard().getTile(x, y));
+                    }
+                    else if (boardController.getBoard().getTile(x, y).getPiece().getTeam() != activeTeam) {
+                        break;
+                    }
+                }
+            }
+            x = location[0];
+            y = location[1];
+            for (int i = 0; i < range; i++) {//south
+                y = y + 1;
+                if (((x < boardController.getSize())
+                        && (y < boardController.getSize()))
+                        && ((x >= 0) && (y >= 0))) {
+                    if (boardController.getBoard().getTile(x, y).getPiece() == null) {
+                        tiles.add(boardController.getBoard().getTile(x, y));
+                    }
+                    else if (boardController.getBoard().getTile(x, y).getPiece().getTeam() != activeTeam) {
+                        break;
+                    }
+                }
+            }
+            x = location[0];
+            y = location[1];
+            for (int i = 0; i > -range; i--) {//west
+                x = x - 1;
+                if (((x < boardController.getSize())
+                        && (y < boardController.getSize()))
+                        && ((x >= 0) && (y >= 0))) {
+                    if (boardController.getBoard().getTile(x, y).getPiece() == null) {
+                        tiles.add(boardController.getBoard().getTile(x, y));
+                    }
+                    else if (boardController.getBoard().getTile(x, y).getPiece().getTeam() != activeTeam) {
+                        break;
+                    }
+                }
+            }
+            return tiles;
+        }
+
+        public ArrayList<Tile> getMoveTilesSquareRange(int[] location, int range) {
+            int X = location[0];
+            int Y = location[1];
+            ArrayList<Tile> tiles = new ArrayList<>();
+            for (int i = -range; i <= range; i++) {
+                for (int j = -range; j <= range; j++) {
+                    int x = X + i;
+                    int y = Y + j;
+                    // Checks the agent isn't looking outside the grid, at its current tile or at terrain.
+                    if (((x < boardController.getSize())
+                            && (y < boardController.getSize()))
+                            && ((x >= 0) && (y >= 0))
+                            && !(i == 0 && j == 0)) {
+                        if (boardController.getBoard().getTile(x, y).getPiece() == null) {
+                            tiles.add(boardController.getBoard().getTile(x, y));
+                        }
+                    }
+                }
+            }
+            return tiles;
+        }
+
+        public ArrayList<Tile> getAttackTilesLineRange(int[] location, int range) {
+            int x = location[0];
+            int y = location[1];
+            ArrayList<Tile> tiles = new ArrayList<>();
+            for (int i = 0; i > -range; i--) {//north
+                y = y - 1;
+                if (((x < boardController.getSize())
+                        && (y < boardController.getSize()))
+                        && ((x >= 0) && (y >= 0))) {
+                    if (boardController.getBoard().getTile(x, y).getPiece()!= null) {
+                        if (boardController.getBoard().getTile(x, y).getPiece().getTeam() != activeTeam) {
+                            tiles.add(boardController.getBoard().getTile(x, y));
+                            break;
+                        }
+                    }
+                }
+            }
+            x = location[0];
+            y = location[1];
+            for (int i = 0; i < range; i++) {//east
+                x = x + 1;
+                if (((x < boardController.getSize())
+                        && (y < boardController.getSize()))
+                        && ((x >= 0) && (y >= 0))) {
+                    if (boardController.getBoard().getTile(x, y).getPiece()!= null) {
+                        if (boardController.getBoard().getTile(x, y).getPiece().getTeam() != activeTeam) {
+                            tiles.add(boardController.getBoard().getTile(x, y));
+                            break;
+                        }
+                    }
+                }
+            }
+            x = location[0];
+            y = location[1];
+            for (int i = 0; i < range; i++) {//south
+                y = y + 1;
+                if (((x < boardController.getSize())
+                        && (y < boardController.getSize()))
+                        && ((x >= 0) && (y >= 0))) {
+                    if (boardController.getBoard().getTile(x, y).getPiece()!= null) {
+                        if (boardController.getBoard().getTile(x, y).getPiece().getTeam() != activeTeam) {
+                            tiles.add(boardController.getBoard().getTile(x, y));
+                            break;
+                        }
+                    }
+                }
+            }
+            x = location[0];
+            y = location[1];
+            for (int i = 0; i > -range; i--) {//west
+                x = x - 1;
+                if (((x < boardController.getSize())
+                        && (y < boardController.getSize()))
+                        && ((x >= 0) && (y >= 0))) {
+                    if (boardController.getBoard().getTile(x, y).getPiece()!= null) {
+                        if (boardController.getBoard().getTile(x, y).getPiece().getTeam() != activeTeam) {
+                            tiles.add(boardController.getBoard().getTile(x, y));
+                            break;
+                        }
+                    }
+                }
+            }
+            return tiles;
+        }
+
+        public ArrayList<Tile> getAttackTilesSquareRange(int[] location, int range) {
+            int X = location[0];
+            int Y = location[1];
+            ArrayList<Tile> tiles = new ArrayList<>();
+            for (int i = -range; i <= range; i++) {
+                for (int j = -range; j <= range; j++) {
+                    int x = X + i;
+                    int y = Y + j;
+                    // Checks the agent isn't looking outside the grid, at its current tile or at terrain.
+                    if (((x < boardController.getSize())
+                            && (y < boardController.getSize()))
+                            && ((x >= 0) && (y >= 0))
+                            && !(i == 0 && j == 0)) {
+                        if (boardController.getBoard().getTile(x, y).getPiece()!= null) {
+                            if (boardController.getBoard().getTile(x, y).getPiece().getTeam() != activeTeam) {
+                                tiles.add(boardController.getBoard().getTile(x, y));
+                            }
+                        }
+                    }
+                }
+            }
+            return tiles;
+        }
+        public ArrayList<Tile> getPotentialAttackTilesLineRange(int[] location, int range ) {
+            int x = location[0];
+            int y = location[1];
+            ArrayList<Tile> tiles = new ArrayList<>();
+            for (int i = 0; i > -range; i--) {//north
+                y = y - 1;
+                if (((x < boardController.getSize())
+                        && (y < boardController.getSize()))
+                        && ((x >= 0) && (y >= 0))) {
+                    if (boardController.getBoard().getTile(x, y).getPiece().getTeam() != activeTeam) {
+                        break;
+                    }
+                }
+            }
+            x = location[0];
+            y = location[1];
+            for (int i = 0; i < range; i++) {//east
+                x = x + 1;
+                if (((x < boardController.getSize())
+                        && (y < boardController.getSize()))
+                        && ((x >= 0) && (y >= 0))) {
+                    if (boardController.getBoard().getTile(x, y).getPiece().getTeam() != activeTeam) {
+                        break;
+                    }
+                }
+            }
+            x = location[0];
+            y = location[1];
+            for (int i = 0; i < range; i++) {//south
+                y = y + 1;
+                if (((x < boardController.getSize())
+                        && (y < boardController.getSize()))
+                        && ((x >= 0) && (y >= 0))) {
+                    if (boardController.getBoard().getTile(x, y).getPiece().getTeam() != activeTeam) {
+                        break;
+                    }
+                }
+            }
+            x = location[0];
+            y = location[1];
+            for (int i = 0; i > -range; i--) {//west
+                x = x - 1;
+                if (((x < boardController.getSize())
+                        && (y < boardController.getSize()))
+                        && ((x >= 0) && (y >= 0))) {
+                    if (boardController.getBoard().getTile(x, y).getPiece().getTeam() != activeTeam) {
+                        break;
+                    }
+                }
+            }
+            return tiles;
+        }
+
 
     }
 
-    public class BoardView {
+    // Groups methods used to display the board as an image
+    public class BoardImage {
+
+        private HashMap<SpriteTags, BufferedImage> sprites = new HashMap<>();
+        private final BufferedImage blankBoardImage;
+        private BufferedImage lastBoardImage;
+
+        public BoardImage() throws IOException {
+            loadSprites();
+            blankBoardImage = blankBoard();
+            lastBoardImage = BoardImage.deepCopy(blankBoardImage);
+        }
 
         public void displayActions() {
-            lastBoardImage = BoardView.deepCopy(blankBoardImage);
-            gameView.updateBoard(boardView.getBoardImage());
-            boardView.displayMovementRange(moveTiles);
-            boardView.displayAttackRange(attackTiles);
-            gameView.updateBoard(boardView.getBoardImage());
+            lastBoardImage = BoardImage.deepCopy(blankBoardImage);
+            gameView.updateBoard(boardImage.getBoardImage());
+            boardImage.displayMovementRange(moveTiles);
+            boardImage.displayAttackRange(attackTiles);
+            gameView.updateBoard(boardImage.getBoardImage());
         }
 
         public void updateBoard() {
-            lastBoardImage = BoardView.deepCopy(blankBoardImage);
-            gameView.updateBoard(boardView.getBoardImage());
+            lastBoardImage = BoardImage.deepCopy(blankBoardImage);
+            gameView.updateBoard(boardImage.getBoardImage());
+            try {
+                File outputfile = new File("turns\\" + System.currentTimeMillis() + ".png");
+                ImageIO.write(boardImage.getBoardImage(), "png", outputfile);
+            }
+            catch (IOException ex) {
+            }
         }
         public BufferedImage getBoardImage() {
-            Random random = new Random();
             int size = boardController.getSize();
             int scale = boardController.getScale();
             for (int x = 0; x <= scale * size; x += scale) {
@@ -219,7 +589,6 @@ public class MainController {
                                             }
                                             else {
                                                 lastBoardImage.setRGB(x + i, y + j, rgba.getRGB());
-
                                             }
                                         }
                                     }
@@ -232,34 +601,16 @@ public class MainController {
             return lastBoardImage;
         }
 
-        public BufferedImage displayMovementRange(ArrayList<Tile> tiles) {
+        public void displayMovementRange(ArrayList<Tile> tiles) {
             int size = boardController.getSize();
             int scale = boardController.getScale();
             for (Tile tile : tiles) {
                 int x = tile.getLocation()[0];
                 int y = tile.getLocation()[1];
-//                if (tile.getPiece() != null) {
-//                    for (int i = 0; i < scale; i++) {
-//                        for (int j = 0; j < scale; j++) {
-//                            if (((x + i < scale * size) && (y + j < scale * size)) && ((x + i >= 0) && (y + j >= 0))) {
-//                                Color rgba = new Color(sprites.get(getPieceSpriteTag(tile.getPiece())).getRGB(i, j), true);
-//                                if (rgba.getAlpha() != 255) {
-//                                    if (tile.getColor() == Color.darkGray) {
-//                                        lastBoardImage.setRGB((x * scale) + i, (y * scale) + j, darkMoveColor.getRGB());
-//                                    }
-//                                    else {
-//                                        lastBoardImage.setRGB((x * scale) + i, (y * scale) + j, lightMoveColor.getRGB());
-//                                    }
-//                                }
-//
-//                            }
-//                        }
-//                    }
-//                }
                     for (int i = 0; i < scale; i++) {
                         for (int j = 0; j < scale; j++) {
                             if (((x + i < scale * size) && (y + j < scale * size)) && ((x + i >= 0) && (y + j >= 0))) {
-                                if (tile.getColor() == Color.darkGray) {
+                                if (tile.getColor() == boardController.getBoard().getDarkColor()) {
                                     lastBoardImage.setRGB((x * scale) + i, (y * scale) + j, darkMoveColor.getRGB());
                                 }
                                 else {
@@ -269,23 +620,21 @@ public class MainController {
                         }
                     }
                 }
-            return lastBoardImage;
         }
 
-        public BufferedImage displayAttackRange(ArrayList<Tile> tiles) {
+        public void displayAttackRange(ArrayList<Tile> tiles) {
             int size = boardController.getSize();
             int scale = boardController.getScale();
             for (Tile tile : tiles) {
                 int x = tile.getLocation()[0];
                 int y = tile.getLocation()[1];
-                if (tile.getPiece() != null) {
+                if (true) {
                     for (int i = 0; i < scale; i++) {
                         for (int j = 0; j < scale; j++) {
                             if (((x + i < scale * size) && (y + j < scale * size)) && ((x + i >= 0) && (y + j >= 0))) {
                                 Color rgba = new Color(sprites.get(getPieceSpriteTag(tile.getPiece())).getRGB(i, j), true);
                                 if (rgba.getAlpha() != 255) {
-                                    //lastBoardImage.setRGB((x * scale) + i, (y * scale) + j, rgba.getRGB());
-                                    if (tile.getColor() == Color.darkGray) {
+                                    if (tile.getColor() == boardController.getBoard().getDarkColor()) {
                                         lastBoardImage.setRGB((x * scale) + i, (y * scale) + j, darkAttackColor.getRGB());
                                     }
                                     else {
@@ -298,10 +647,30 @@ public class MainController {
                     }
                 }
             }
-            return lastBoardImage;
+        }
+        public void updateTiles(ArrayList<Tile> tiles) {
+            int size = boardController.getSize();
+            int scale = boardController.getScale();
+            for (Tile tile : tiles) {
+                int x = tile.getLocation()[0];
+                int y = tile.getLocation()[1];
+                if (tile.getPiece() != null) {
+                    for (int i = 0; i < scale; i++) {
+                        for (int j = 0; j < scale; j++) {
+                            if (((x + i < scale * size) && (y + j < scale * size)) && ((x + i >= 0) && (y + j >= 0))) {
+                                Color rgba = new Color(sprites.get(getPieceSpriteTag(tile.getPiece())).getRGB(i, j), true);
+                                if (rgba.getAlpha() == 255) {
+                                    lastBoardImage.setRGB(x + i, y + j, rgba.getRGB());
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
         }
 
-        public BufferedImage scaledImage() {
+        public BufferedImage blankBoard() {
             int size = boardController.getSize();
             int scale = boardController.getScale();
             BufferedImage boardImage = new BufferedImage(size * scale, size * scale, BufferedImage.TYPE_INT_RGB);
@@ -324,33 +693,6 @@ public class MainController {
                 sprites.put(spriteTag, ImageIO.read((new File(spritePathMap(spriteTag)).toURI()).toURL()));
             }
 
-        }
-
-        public String getSpritePath(SpriteTags spriteTag, Piece piece) {
-            if (piece.getDirection() != null) {
-                return getDirectionSpritePath(spritePathMap(spriteTag), piece.getDirection());
-            }
-            return spritePathMap(spriteTag);
-        }
-
-        public String getDirectionSpritePath(String path, Direction direction) {
-            String fileName = path.substring(0, path.length() - 4);
-            System.out.println(fileName);
-            switch (direction) {
-                case NORTH -> {
-                    return fileName + "_north.png";
-                }
-                case EAST -> {
-                    return fileName + "_east.png";
-                }
-                case SOUTH -> {
-                    return fileName + "_south.png";
-                }
-                case WEST -> {
-                    return fileName + "_west.png";
-                }
-            }
-            return path;
         }
 
         public String spritePathMap(SpriteTags spriteTag) {
@@ -550,427 +892,4 @@ public class MainController {
             return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
         }
     }
-
-    public class GameLogic {
-
-        public void move(Piece piece, int x, int y) {
-            if (piece.getDirection() != null) {
-                int x1 = piece.getLocation()[0];
-                int y1 = piece.getLocation()[1];
-                if(x > x1) {
-                    piece.setDirection(Direction.EAST);
-                }
-                if (x < x1) {
-                    piece.setDirection(Direction.WEST);
-                }
-                if(y > y1) {
-                    piece.setDirection(Direction.SOUTH);
-                }
-                if (y < y1) {
-                    piece.setDirection(Direction.NORTH);
-                }
-            }
-            boardController.move(piece, x, y);
-        }
-
-        public boolean performAction() {
-            for (Tile tile : moveTiles) {
-                if (lastClickedTile.getLocation()[0] == tile.getLocation()[0] && lastClickedTile.getLocation()[1] == tile.getLocation()[1]) {
-                    move(activePiece, lastClickedTile.getLocation()[0], lastClickedTile.getLocation()[1]);
-                    return true;
-                }
-            }
-            for (Tile tile : attackTiles) {
-                if (lastClickedTile.getLocation()[0] == tile.getLocation()[0] && lastClickedTile.getLocation()[1] == tile.getLocation()[1]) {
-                    if (tile.getPiece().getTeam() != activePiece.getTeam()) {
-                            ArrayList<Object> result = boardController.attack(activePiece, tile.getPiece());
-                        gameView.getSidePanel().getInfoPanel().setAttackResult(activePiece, (Piece) result.get(0), (int) result.get(1), (boolean) result.get(2), (boolean) result.get(3));
-
-                    }
-                    else {
-                        move(activePiece, lastClickedTile.getLocation()[0], lastClickedTile.getLocation()[1]);
-                    }
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public void getActivePieceActions() {
-            moveTiles = gameLogic.getMoveTiles(activePiece.getLocation(), activePiece.getMovementRange(), activePiece.getDirection());
-            //attackTiles = gameLogic.getAttackTilesInSquareRange(activePiece.getLocation(), activePiece.getAttackRange(), activePiece.getTeam());
-            attackTiles = gameLogic.getAttackTiles(activePiece.getLocation(), activePiece.getAttackRange(), activePiece.getDirection(), activePiece.getTeam());
-        }
-
-        public void setNorth() {
-            if (gameState == GameState.PIECE_SELECTED) {
-                activePiece.setDirection(Direction.NORTH);
-                startRotate();
-            }
-        }
-        public void setSouth() {
-            if (gameState == GameState.PIECE_SELECTED) {
-                activePiece.setDirection(Direction.SOUTH);
-                startRotate();
-            }
-        }
-        public void setEast() {
-            if (gameState == GameState.PIECE_SELECTED) {
-                activePiece.setDirection(Direction.EAST);
-                startRotate();
-            }
-        }
-        public void setWest() {
-            if (gameState == GameState.PIECE_SELECTED) {
-                activePiece.setDirection(Direction.WEST);
-                startRotate();
-            }
-        }
-
-
-
-        public ArrayList<Tile> getMoveTiles(int[] location, int range, Direction direction) {
-            if (direction != null) {
-                //return getTilesInLineRange(location, range, direction);
-                return getTilesInLineRangeAlpha(location, range, direction);
-            }
-            else {
-                return getTilesInSquareRange(location, range);
-            }
-        }
-
-        public ArrayList<Tile> getAttackTiles(int[] location, int range, Direction direction, Team team) {
-            if (direction != null) {
-                return getAttackTilesInLineRangeAlpha(location, range, direction);
-            }
-            else {
-                return getAttackTilesInSquareRange(location, range, team);
-            }
-        }
-
-        public ArrayList<Tile> getTilesInLineRange(int[] location, int range, Direction direction) {
-            int x = location[0];
-            int y = location[1];
-            ArrayList<Tile> tiles = new ArrayList<>();
-            switch (direction) {
-                case NORTH -> {
-                    for (int i = 0; i > -range; i--) {
-                        y = y - 1;
-                        if (((x < boardController.getSize())
-                                && (y < boardController.getSize()))
-                                && ((x >= 0) && (y >= 0))) {
-                            if (boardController.getBoard().getTile(x, y).getPiece() == null) {
-                                tiles.add(boardController.getBoard().getTile(x, y));
-                            }
-                            else if (boardController.getBoard().getTile(x, y).getPiece().getTeam() != activeTeam) {
-                                return tiles;
-                            }
-                        }
-                    }
-                }
-                case EAST -> {
-                    for (int i = 0; i < range; i++) {
-                        x = x + 1;
-                        if (((x < boardController.getSize())
-                                && (y < boardController.getSize()))
-                                && ((x >= 0) && (y >= 0))) {
-                            if (boardController.getBoard().getTile(x, y).getPiece() == null) {
-                                tiles.add(boardController.getBoard().getTile(x, y));
-                            }
-                            else if (boardController.getBoard().getTile(x, y).getPiece().getTeam() != activeTeam) {
-                                return tiles;
-                            }
-                        }
-                    }
-                }
-                case SOUTH -> {
-                    for (int i = 0; i < range; i++) {
-                        y = y + 1;
-                        if (((x < boardController.getSize())
-                                && (y < boardController.getSize()))
-                                && ((x >= 0) && (y >= 0))) {
-                            if (boardController.getBoard().getTile(x, y).getPiece() == null) {
-                                tiles.add(boardController.getBoard().getTile(x, y));
-                            }
-                            else if (boardController.getBoard().getTile(x, y).getPiece().getTeam() != activeTeam) {
-                                return tiles;
-                            }
-                        }
-                    }
-                }
-                case WEST -> {
-                    for (int i = 0; i > -range; i--) {
-                        x = x - 1;
-                        if (((x < boardController.getSize())
-                                && (y < boardController.getSize()))
-                                && ((x >= 0) && (y >= 0))) {
-                            if (boardController.getBoard().getTile(x, y).getPiece() == null) {
-                                tiles.add(boardController.getBoard().getTile(x, y));
-                            }
-                            else if (boardController.getBoard().getTile(x, y).getPiece().getTeam() != activeTeam) {
-                                return tiles;
-                            }
-                        }
-                    }
-                }
-            }
-            return tiles;
-        }
-
-        public ArrayList<Tile> getTilesInLineRangeAlpha(int[] location, int range, Direction direction) {
-            int x = location[0];
-            int y = location[1];
-            ArrayList<Tile> tiles = new ArrayList<>();
-            Direction lineDirection = Direction.NORTH;
-            for (int i = 0; i > -range; i--) {//north
-                y = y - 1;
-                if (((x < boardController.getSize())
-                        && (y < boardController.getSize()))
-                        && ((x >= 0) && (y >= 0))) {
-                    if (boardController.getBoard().getTile(x, y).getPiece() == null) {
-                        tiles.add(boardController.getBoard().getTile(x, y));
-                    }
-                    else if (boardController.getBoard().getTile(x, y).getPiece().getTeam() != activeTeam) {
-                        break;
-                    }
-                }
-            }
-            x = location[0];
-            y = location[1];
-            lineDirection = Direction.EAST;
-            for (int i = 0; i < range; i++) {//east
-                x = x + 1;
-                if (((x < boardController.getSize())
-                        && (y < boardController.getSize()))
-                        && ((x >= 0) && (y >= 0))) {
-                    if (boardController.getBoard().getTile(x, y).getPiece() == null) {
-                        tiles.add(boardController.getBoard().getTile(x, y));
-                    }
-                    else if (boardController.getBoard().getTile(x, y).getPiece().getTeam() != activeTeam) {
-                        break;
-                    }
-                }
-            }
-            x = location[0];
-            y = location[1];
-            lineDirection = Direction.SOUTH;
-            for (int i = 0; i < range; i++) {//south
-                y = y + 1;
-                if (((x < boardController.getSize())
-                        && (y < boardController.getSize()))
-                        && ((x >= 0) && (y >= 0))) {
-                    if (boardController.getBoard().getTile(x, y).getPiece() == null) {
-                        tiles.add(boardController.getBoard().getTile(x, y));
-                    }
-                    else if (boardController.getBoard().getTile(x, y).getPiece().getTeam() != activeTeam) {
-                        break;
-                    }
-                }
-            }
-            x = location[0];
-            y = location[1];
-            lineDirection = Direction.WEST;
-            for (int i = 0; i > -range; i--) {//west
-                x = x - 1;
-                if (((x < boardController.getSize())
-                        && (y < boardController.getSize()))
-                        && ((x >= 0) && (y >= 0))) {
-                    if (boardController.getBoard().getTile(x, y).getPiece() == null) {
-                        tiles.add(boardController.getBoard().getTile(x, y));
-                    }
-                    else if (boardController.getBoard().getTile(x, y).getPiece().getTeam() != activeTeam) {
-                        break;
-                    }
-                }
-            }
-            return tiles;
-        }
-
-        public ArrayList<Tile> getAttackTilesInLineRangeAlpha(int[] location, int range, Direction direction) {
-            int x = location[0];
-            int y = location[1];
-            ArrayList<Tile> tiles = new ArrayList<>();
-            Direction lineDirection = Direction.NORTH;
-            for (int i = 0; i > -range; i--) {//north
-                y = y - 1;
-                if (((x < boardController.getSize())
-                        && (y < boardController.getSize()))
-                        && ((x >= 0) && (y >= 0))) {
-                    if (boardController.getBoard().getTile(x, y).getPiece()!= null) {
-                        if (boardController.getBoard().getTile(x, y).getPiece().getTeam() != activeTeam) {
-                            tiles.add(boardController.getBoard().getTile(x, y));
-                            break;
-                        }
-                    }
-                }
-            }
-            x = location[0];
-            y = location[1];
-            lineDirection = Direction.EAST;
-            for (int i = 0; i < range; i++) {//east
-                x = x + 1;
-                if (((x < boardController.getSize())
-                        && (y < boardController.getSize()))
-                        && ((x >= 0) && (y >= 0))) {
-                    if (boardController.getBoard().getTile(x, y).getPiece()!= null) {
-                        if (boardController.getBoard().getTile(x, y).getPiece().getTeam() != activeTeam) {
-                            tiles.add(boardController.getBoard().getTile(x, y));
-                            break;
-                        }
-                    }
-                }
-            }
-            x = location[0];
-            y = location[1];
-            lineDirection = Direction.SOUTH;
-            for (int i = 0; i < range; i++) {//south
-                y = y + 1;
-                if (((x < boardController.getSize())
-                        && (y < boardController.getSize()))
-                        && ((x >= 0) && (y >= 0))) {
-                    if (boardController.getBoard().getTile(x, y).getPiece()!= null) {
-                        if (boardController.getBoard().getTile(x, y).getPiece().getTeam() != activeTeam) {
-                            tiles.add(boardController.getBoard().getTile(x, y));
-                            break;
-                        }
-                    }
-                }
-            }
-            x = location[0];
-            y = location[1];
-            lineDirection = Direction.WEST;
-            for (int i = 0; i > -range; i--) {//west
-                x = x - 1;
-                if (((x < boardController.getSize())
-                        && (y < boardController.getSize()))
-                        && ((x >= 0) && (y >= 0))) {
-                    if (boardController.getBoard().getTile(x, y).getPiece()!= null) {
-                        if (boardController.getBoard().getTile(x, y).getPiece().getTeam() != activeTeam) {
-                            tiles.add(boardController.getBoard().getTile(x, y));
-                            break;
-                        }
-                    }
-                }
-            }
-            return tiles;
-        }
-
-        public ArrayList<Tile> getAttackTilesInLineRange(int[] location, int range, Direction direction, Team team) {
-            int x = location[0];
-            int y = location[1];
-            ArrayList<Tile> tiles = new ArrayList<>();
-            switch (direction) {
-                case NORTH -> {
-                    for (int i = 0; i > -range; i--) {
-                        y = y - 1;
-                        if (((x < boardController.getSize())
-                                && (y < boardController.getSize()))
-                                && ((x >= 0) && (y >= 0))) {
-                            if (boardController.getBoard().getTile(x, y).getPiece()!= null) {
-                                if (boardController.getBoard().getTile(x, y).getPiece().getTeam() != activeTeam) {
-                                    tiles.add(boardController.getBoard().getTile(x, y));
-                                    return tiles;
-                                }
-                            }
-                        }
-                    }
-                }
-                case EAST -> {
-                    for (int i = 0; i < range; i++) {
-                        x = x + 1;
-                        if (((x < boardController.getSize())
-                                && (y < boardController.getSize()))
-                                && ((x >= 0) && (y >= 0))) {
-                            if (boardController.getBoard().getTile(x, y).getPiece()!= null) {
-                                if (boardController.getBoard().getTile(x, y).getPiece().getTeam() != activeTeam) {
-                                    tiles.add(boardController.getBoard().getTile(x, y));
-                                    return tiles;
-                                }
-                            }
-                        }
-                    }
-                }
-                case SOUTH -> {
-                    for (int i = 0; i < range; i++) {
-                        y = y + 1;
-                        if (((x < boardController.getSize())
-                                && (y < boardController.getSize()))
-                                && ((x >= 0) && (y >= 0))) {
-                            if (boardController.getBoard().getTile(x, y).getPiece()!= null) {
-                                if (boardController.getBoard().getTile(x, y).getPiece().getTeam() != activeTeam) {
-                                    tiles.add(boardController.getBoard().getTile(x, y));
-                                    return tiles;
-                                }
-                            }
-                        }
-                    }
-                }
-                case WEST -> {
-                    for (int i = 0; i > -range; i--) {
-                        x = x - 1;
-                        if (((x < boardController.getSize())
-                                && (y < boardController.getSize()))
-                                && ((x >= 0) && (y >= 0))) {
-                            if (boardController.getBoard().getTile(x, y).getPiece()!= null) {
-                                if (boardController.getBoard().getTile(x, y).getPiece().getTeam() != activeTeam) {
-                                    tiles.add(boardController.getBoard().getTile(x, y));
-                                    return tiles;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            return tiles;
-        }
-
-        public ArrayList<Tile> getTilesInSquareRange(int[] location, int range) {
-            int X = location[0];
-            int Y = location[1];
-            ArrayList<Tile> tiles = new ArrayList<>();
-            for (int i = -range; i <= range; i++) {
-                for (int j = -range; j <= range; j++) {
-                    int x = X + i;
-                    int y = Y + j;
-                    // Checks the agent isn't looking outside the grid, at its current tile or at terrain.
-                    if (((x < boardController.getSize())
-                            && (y < boardController.getSize()))
-                            && ((x >= 0) && (y >= 0))
-                            && !(i == 0 && j == 0)) {
-                        if (boardController.getBoard().getTile(x, y).getPiece() == null) {
-                            tiles.add(boardController.getBoard().getTile(x, y));
-                        }
-                    }
-                }
-            }
-            return tiles;
-        }
-
-        public ArrayList<Tile> getAttackTilesInSquareRange(int[] location, int range, Team team) {
-            int X = location[0];
-            int Y = location[1];
-            ArrayList<Tile> tiles = new ArrayList<>();
-            for (int i = -range; i <= range; i++) {
-                for (int j = -range; j <= range; j++) {
-                    int x = X + i;
-                    int y = Y + j;
-                    // Checks the agent isn't looking outside the grid, at its current tile or at terrain.
-                    if (((x < boardController.getSize())
-                            && (y < boardController.getSize()))
-                            && ((x >= 0) && (y >= 0))
-                            && !(i == 0 && j == 0)) {
-                        if (boardController.getBoard().getTile(x, y).getPiece()!= null) {
-                            if (boardController.getBoard().getTile(x, y).getPiece().getTeam() != activeTeam) {
-                                tiles.add(boardController.getBoard().getTile(x, y));
-                            }
-                        }
-                    }
-                }
-            }
-            return tiles;
-        }
-    }
-
-
-
 }

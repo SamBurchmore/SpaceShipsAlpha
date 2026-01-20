@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 
 public class SidePanel {
 
@@ -16,7 +17,7 @@ public class SidePanel {
     private final InfoPanel infoPanel;
 
 
-    public SidePanel() {
+    public SidePanel() throws IOException {
         turnPanel = new JPanel();
         infoPanel = new InfoPanel();
         JPanel blankPanel0 = new JPanel();

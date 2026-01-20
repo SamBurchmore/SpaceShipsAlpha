@@ -10,6 +10,8 @@ public class Tile {
 
     private Color color;
 
+    private boolean lightOrDark; // light = false, dark = true
+
     public Tile(int x, int y) {
         setLocation(x, y);
     }
@@ -43,4 +45,6 @@ public class Tile {
     public Color getColor() {
         return color;
     }
+
+
 }

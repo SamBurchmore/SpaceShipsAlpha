@@ -3,10 +3,6 @@ import java.security.DigestInputStream;
 
 public interface Piece {
 
-    Movement movement = null;
-
-    Attack attack = null;
-
     Direction getValidDirectionChanges();
 
     PieceType getType();
