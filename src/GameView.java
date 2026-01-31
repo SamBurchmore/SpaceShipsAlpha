@@ -19,12 +19,12 @@ public class GameView {
     private final TopPanel topPanel;
     private final RightPanel rightPanel;
 
-    private Color backgroundColour = new Color(150, 150, 150);
+    private Color backgroundColour = new Color(200, 200, 200);
 
 
     public GameView() throws IOException {
         gameFrame = new JFrame();
-        gameFrame.setBackground(backgroundColour);
+        gameFrame.setForeground(backgroundColour);
         bottomPanel = new BottomPanel();
         topPanel = new TopPanel();
         rightPanel = new RightPanel();
@@ -50,7 +50,7 @@ public class GameView {
 
         c.gridx = 4;
         c.gridy = 0;
-        c.gridheight = 4;
+        c.gridheight = 5;
         c.gridwidth = 2;
         gameFrame.add(rightPanel.getDisplayComponent(), c);
 
@@ -67,12 +67,14 @@ public class GameView {
         gameFrame.add(boardPanel, c);
 
         c.gridx = 0;
-        c.gridy = 5;
+        c.gridy = 4;
         c.gridheight = 1;
         c.gridwidth = 3;
 
         gameFrame.add(bottomPanel.getDisplayComponent(), c);
         boardPanel.setPreferredSize(new Dimension(size, size));
+        topPanel.getDisplayComponent().setPreferredSize(new Dimension(600, 80));
+        bottomPanel.getDisplayComponent().setPreferredSize(new Dimension(600, 80));
         gameFrame.pack();
 
     }
@@ -113,13 +115,18 @@ public class GameView {
 
     public void updateTurn(Team team) throws IOException {
         BufferedImage turnIcon;
+        Color color;
         if (team == Team.WHITE) {
             turnIcon = ImageIO.read(new File("images\\white_turn_bar.png"));
+            color = Color.white;
         }
         else {
             turnIcon = ImageIO.read(new File("images\\black_turn_bar.png"));
+            color = Color.black;
         }
-        bottomPanel.getDisplayComponent().setIcon(new ImageIcon(turnIcon));
-        topPanel.getDisplayComponent().setIcon(new ImageIcon(turnIcon));
+        bottomPanel.getImage().setIcon(new ImageIcon(turnIcon));
+        bottomPanel.getDisplayComponent().setBackground(color);
+        topPanel.getImage().setIcon(new ImageIcon(turnIcon));
+        topPanel.getDisplayComponent().setBackground(color);
     }
 }

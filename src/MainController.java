@@ -34,7 +34,8 @@ public class MainController {
     private ArrayList<Tile> attackTiles;
     public GameState gameState;
 
-    public int actionPoints = 3;
+    public int maxActionPoints = 3;
+    public int actionPoints = maxActionPoints;
 
     public ArrayList<Piece> movedPieces;
 
@@ -81,13 +82,13 @@ public class MainController {
             return false;
         }
 
-        public void newTurn() throws IOException {
+        public void newTurn() throws IOException, InterruptedException {
 
             for (Piece piece: movedPieces) {
                 piece.setHasMoved(false);
             }
             movedPieces.clear();
-            actionPoints = 3;
+            actionPoints = maxActionPoints;
             if (activeTeam == Team.BLACK) {
                 activeTeam = Team.WHITE;
             }
@@ -99,6 +100,7 @@ public class MainController {
             gameView.getRightPanel().getInfoPanel().clearInfoPanelText();
             gameView.getRightPanel().clearPieceImages();
             boardImage.updateBoard();
+            System.out.println("new turn");
         }
 
         public void resetTurn() throws IOException {
@@ -109,7 +111,7 @@ public class MainController {
             boardImage.updateBoard();
         }
 
-        public void runGame() throws IOException {
+        public void runGame() throws IOException, InterruptedException {
             gameView.getRightPanel().getInfoPanel().clearInfoPanelText();
             gameView.getRightPanel().clearPieceImages();
             System.out.println(gameState);
@@ -142,26 +144,7 @@ public class MainController {
                         System.out.println("action performed");
                         activePiece.setHasMoved(true);
                         movedPieces.add(activePiece);
-                        switch (activePiece.getType()) {
-                            case CORVETTE -> {
-                                actionPoints -= 1;
-                            }
-                            case FRIGATE -> {
-                                actionPoints -= 1;
-                            }
-                            case DESTROYER -> {
-                                actionPoints -= 2;
-                            }
-                            case CRUISER -> {
-                                actionPoints -= 2;
-                            }
-                            case BATTLESHIP -> {
-                                actionPoints -= 2;
-                            }
-                            case CARRIER -> {
-                                actionPoints -= 2;
-                            }
-                        }
+                        actionPoints -= activePiece.getActionCost();
                         if (actionPoints <= 0) {
                             newTurn();
                             gameView.updateTurn(activeTeam);
@@ -200,6 +183,8 @@ public class MainController {
                 try {
                     runGame();
                 } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                } catch (InterruptedException ex) {
                     throw new RuntimeException(ex);
                 }
             }
@@ -265,7 +250,7 @@ public class MainController {
                 return result;
             }
             if (!defender.getDamaged()) {
-                if (attacker.getType() == PieceType.FRIGATE || attacker.getType() == PieceType.CRUISER) {
+                if (attacker.getType() == PieceType.FRIGATE || attacker.getType() == PieceType.CRUISER || attacker.getType() == PieceType.CARRIER) {
                     if (attackScore >= defender.getArmour() / 2) {
                         defender.setDamaged(true);
                         result.add(defender);
@@ -618,6 +603,10 @@ public class MainController {
             boardImage.displayMovementRange(moveTiles);
             boardImage.displayAttackRange(attackTiles);
             gameView.updateBoard(boardImage.getBoardImage());
+        }
+
+        public void runActionPointResetAnimation(int ap) throws InterruptedException {
+            gameView.getRightPanel().resetActionPointAnimation(ap);
         }
 
         public void updateBoard() {

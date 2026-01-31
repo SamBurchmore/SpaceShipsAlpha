@@ -4,7 +4,7 @@ public class Carrier extends BasePiece {
 
 
     public Carrier(Team team, int[] location) {
-        super(team, location, 4, 8, 5, 1, null, 2, "Carrier");
+        super(team, location, 4, 8, 5, 1, null, 3, "Carrier");
     }
 
     @Override

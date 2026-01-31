@@ -24,12 +24,23 @@ public class InfoDisplay {
         attackLabel = new JLabel(" ");
         pieceLabel = new JLabel(" ");
         actionPointCostLabel = new JLabel(" ");
+        attackScoreLabel.setForeground(Color.black);
+        attackRangeLabel.setForeground(Color.black);
+        attackLabel.setForeground(Color.black);
+        pieceLabel.setForeground(Color.black);
+        actionPointCostLabel.setForeground(Color.black);
+        armourLabel.setFont(new Font("Sans Serif", Font.BOLD, 13));
+        attackScoreLabel.setFont(new Font("Sans Serif", Font.BOLD, 13));
+        attackRangeLabel.setFont(new Font("Sans Serif", Font.BOLD, 13));
+        attackLabel.setFont(new Font("Sans Serif", Font.BOLD, 13));
+        pieceLabel.setFont(new Font("Sans Serif", Font.BOLD, 13));
+        actionPointCostLabel.setFont(new Font("Sans Serif", Font.BOLD, 13));
         infoPanel = new JPanel();
         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
         //infoPanel.add(pieceLabel);
-        infoPanel.add(armourLabel);
-        infoPanel.add(attackScoreLabel);
         infoPanel.add(attackRangeLabel);
+        infoPanel.add(attackScoreLabel);
+        infoPanel.add(armourLabel);
         infoPanel.add(actionPointCostLabel);
 
         attackInfoPanel = new JPanel();
@@ -37,8 +48,8 @@ public class InfoDisplay {
 
         infoPanel.add(attackInfoPanel);
         JPanel space = new JPanel();
-        containerPanel.add(space);
-        containerPanel.add(infoPanel);
+        //containerPanel.add(space);
+        //containerPanel.add(infoPanel);
 
     }
 
@@ -53,10 +64,10 @@ public class InfoDisplay {
             actionPointCostLabel.setText("Costs " + piece.getActionCost() + " Action Point");
         }
         if (piece.getType() == PieceType.FRIGATE) {
-            attackScoreLabel.setText("Attack Score: Equal to targets armour");
+            attackScoreLabel.setText("Attack Dice: Equal to targets maximum armour");
         }
         else {
-            attackScoreLabel.setText("Attack Score: " + piece.getAttack());
+            attackScoreLabel.setText("Attack Dice: " + piece.getAttack());
         }
         attackRangeLabel.setText("Attack Range: " + piece.getAttackRange());
         pieceLabel.setText(String.valueOf(piece.getType()));
@@ -86,7 +97,7 @@ public class InfoDisplay {
                 }
             }
             else {
-                attackLabel.setText(attackScore + " vs " + defender.getArmour()/2 + ". Fail.\n" + defender.getType() + " missed.");
+                attackLabel.setText(attackScore + " vs " + defender.getArmour()/2 + ". Fail.\n" + defender.getType() + " survived attack.");
             }
         }
         else if (damaged) {
@@ -101,11 +112,18 @@ public class InfoDisplay {
             }
         }
         else {
-            attackLabel.setText(attackScore + " vs " + defender.getArmour() + ". Fail.\n " + defender.getType() + " missed.");
+            attackLabel.setText(attackScore + " vs " + defender.getArmour() + ". Fail.\n " + defender.getType() + " survived attack.");
         }
     }
 
     public JPanel getDisplayComponent() {
-        return containerPanel;
+        return infoPanel;
     }
+
+    public void setColour(Color color) {
+        infoPanel.setBackground(color);
+        attackInfoPanel.setBackground(color);
+    }
+
+
 }

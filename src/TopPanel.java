@@ -9,15 +9,22 @@ public class TopPanel {
 
     private JLabel turnLabel;
 
+    private JPanel containerPanel;
 
-    public TopPanel() throws IOException {
+    public TopPanel() {
+        containerPanel = new JPanel(new GridBagLayout());
         turnLabel = new JLabel();
-        turnLabel.setPreferredSize(new Dimension(600, 50));
+        containerPanel.add(turnLabel);
+        //turnLabel.setPreferredSize(new Dimension(600, 50));
+
     }
 
 
 
-    public JLabel getDisplayComponent() {
+    public JPanel getDisplayComponent() {
+        return containerPanel;
+    }
+    public JLabel getImage() {
         return turnLabel;
     }
 }

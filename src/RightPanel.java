@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 public class RightPanel {
 
@@ -22,6 +23,12 @@ public class RightPanel {
     private BufferedImage actionPointImage1;
     private BufferedImage actionPointImage2;
     private BufferedImage actionPointImage3;
+    private BufferedImage actionPointImage4;
+    private BufferedImage actionPointImage5;
+    private BufferedImage actionPointImage6;
+    private BufferedImage actionPointImage7;
+    private BufferedImage actionPointImage8;
+    private BufferedImage actionPointImage9;
     private BufferedImage blankRangeDisplay;
     private BufferedImage blankPieceImage;
     private BufferedImage corvetteRangeImage;
@@ -42,12 +49,18 @@ public class RightPanel {
     private BufferedImage whiteCruiserDisplayImage;
     private BufferedImage whiteBattleshipDisplayImage;
     private BufferedImage whiteCarrierDisplayImage;
+    private BufferedImage corvetteNameDisplayImage;
+    private BufferedImage frigateNameDisplayImage;
+    private BufferedImage destroyerNameDisplayImage;
+    private BufferedImage cruiserNameDisplayImage;
+    private BufferedImage battleshipNameDisplayImage;
+    private BufferedImage carrierNameDisplayImage;
+    private BufferedImage blankNameDisplayImage;
 
     private final Color backgroundColour = new Color(200, 200, 200);
     public RightPanel() throws IOException {
         loadImages();
         rightPanel = new JPanel();
-        rightPanel.setPreferredSize(new Dimension(350, 750));
         rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
         infoDisplay = new InfoDisplay();
         //infoPanel.getDisplayComponent().setPreferredSize(new Dimension(200, 1));
@@ -60,16 +73,22 @@ public class RightPanel {
         pieceNameLabel = new JLabel();
         
         pieceAttributes = new JPanel();
-        pieceRangeImage.setPreferredSize(new Dimension(260, 260));
-        pieceRangeImage.setIcon(new ImageIcon(blankRangeDisplay));
-        pieceRangeImage.setIcon(new ImageIcon(blankPieceImage));
-        piecePanel.setPreferredSize(new Dimension(260, 480));
-        piecePanel.add(pieceImage);
-        piecePanel.add(pieceRangeImage);
 
+        pieceRangeImage.setIcon(new ImageIcon(blankRangeDisplay));
+        pieceImage.setIcon(new ImageIcon(blankPieceImage));
+
+        pieceNameLabel.setIcon(new ImageIcon(blankNameDisplayImage));
         JPanel pieceNamePanel = new JPanel();
         pieceNamePanel.add(pieceNameLabel);
-        rightPanel.add(pieceNamePanel);
+        piecePanel.add(pieceNamePanel);
+
+        JPanel pieceImagePanel = new JPanel();
+        pieceImagePanel.add(pieceImage);
+        piecePanel.add(pieceImagePanel);
+
+        JPanel pieceRangeImagePanel = new JPanel();
+        pieceRangeImagePanel.add(pieceRangeImage);
+        piecePanel.add(pieceRangeImagePanel);
 
         rightPanel.add(piecePanel);
 
@@ -77,15 +96,41 @@ public class RightPanel {
         infoDisplayPanel.add(infoDisplay.getDisplayComponent());
         rightPanel.add(infoDisplayPanel);
 
+
+
         JPanel remainingActionPointsPanel = new JPanel();
         remainingActionPointsPanel.add(remainingActionPointsLabel);
+        remainingActionPointsPanel.setLayout(new GridBagLayout());
         rightPanel.add(remainingActionPointsPanel);
 
+//        JPanel blankSpace0 = new JPanel();
+//        blankSpace0.setPreferredSize(new Dimension(350, 50));
+//        blankSpace0.setBackground(Color.green);
+//        rightPanel.add(blankSpace0);
+
+        pieceNamePanel.setPreferredSize(new Dimension(350, 35));
+        remainingActionPointsPanel.setPreferredSize(new Dimension(260, 100));
+        pieceImagePanel.setPreferredSize(new Dimension(220, 230));
+        pieceRangeImagePanel.setPreferredSize(new Dimension(260, 300));
+        piecePanel.setPreferredSize(new Dimension(260, 600));
+
+        remainingActionPointsPanel.setPreferredSize(new Dimension(350, 110));
+
+        //infoDisplay.getDisplayComponent().setPreferredSize(new Dimension(350, 100));
+
+        rightPanel.setPreferredSize(new Dimension(350, 760));
+
+
+        pieceImagePanel.setBackground(backgroundColour);
+        pieceRangeImagePanel.setBackground(backgroundColour);
         piecePanel.setBackground(backgroundColour);
         pieceImage.setBackground(backgroundColour);
         rightPanel.setBackground(backgroundColour);
+        remainingActionPointsPanel.setBackground(backgroundColour);
         //panel.setBackground(backgroundColour);
-        infoDisplay.getDisplayComponent().setBackground(backgroundColour);
+        infoDisplayPanel.setBackground(backgroundColour);
+        infoDisplay.setColour(backgroundColour);
+
     }
 
     public void loadImages() throws IOException {
@@ -93,6 +138,12 @@ public class RightPanel {
         actionPointImage1 = ImageIO.read(new File("images\\actionPointPanels\\actionPointPanel1.png"));
         actionPointImage2 = ImageIO.read(new File("images\\actionPointPanels\\actionPointPanel2.png"));
         actionPointImage3 = ImageIO.read(new File("images\\actionPointPanels\\actionPointPanel3.png"));
+        actionPointImage4 = ImageIO.read(new File("images\\actionPointPanels\\actionPointPanel4.png"));
+        actionPointImage5 = ImageIO.read(new File("images\\actionPointPanels\\actionPointPanel5.png"));
+        actionPointImage6 = ImageIO.read(new File("images\\actionPointPanels\\actionPointPanel6.png"));
+        actionPointImage7 = ImageIO.read(new File("images\\actionPointPanels\\actionPointPanel7.png"));
+        actionPointImage8 = ImageIO.read(new File("images\\actionPointPanels\\actionPointPanel8.png"));
+        actionPointImage9 = ImageIO.read(new File("images\\actionPointPanels\\actionPointPanel9.png"));
         blankRangeDisplay = ImageIO.read(new File("images\\blank_range_display.png"));
         blankPieceImage = ImageIO.read(new File("images\\blank_piece.png"));
         corvetteRangeImage = ImageIO.read(new File("images\\corvette_range_display.png"));
@@ -113,6 +164,13 @@ public class RightPanel {
         blackCruiserDisplayImage = ImageIO.read(new File("images\\big_cruiser_black.png"));
         blackBattleshipDisplayImage = ImageIO.read(new File("images\\big_battleship_black.png"));
         blackCarrierDisplayImage = ImageIO.read(new File("images\\big_carrier_black.png"));
+        corvetteNameDisplayImage = ImageIO.read(new File("images\\corvette_name_display.png"));
+        frigateNameDisplayImage = ImageIO.read(new File("images\\frigate_name_display.png"));
+        destroyerNameDisplayImage = ImageIO.read(new File("images\\destroyer_name_display.png"));
+        cruiserNameDisplayImage = ImageIO.read(new File("images\\cruiser_name_display.png"));
+        battleshipNameDisplayImage = ImageIO.read(new File("images\\battleship_name_display.png"));
+        carrierNameDisplayImage = ImageIO.read(new File("images\\carrier_name_display.png"));
+        blankNameDisplayImage = ImageIO.read(new File("images\\blank_name_display.png"));
     }
 
     public JPanel getDisplayComponent() {
@@ -121,7 +179,7 @@ public class RightPanel {
 
     public void updateSelectedPiece(Piece piece, SpriteTags spriteTag) {
         pieceImage.setIcon(new ImageIcon(spritePathMap(spriteTag)));
-        pieceNameLabel.setText(piece.getName());
+        pieceNameLabel.setIcon(new ImageIcon(pieceNameImageMap(piece)));
 
     }
 
@@ -131,6 +189,28 @@ public class RightPanel {
     public void clearPieceImages() {
         pieceImage.setIcon(new ImageIcon(blankPieceImage));
         pieceRangeImage.setIcon(new ImageIcon(blankRangeDisplay));
+        pieceNameLabel.setIcon(new ImageIcon(blankNameDisplayImage));
+    }
+
+    public void resetActionPointAnimation(int ap) throws InterruptedException {
+        updateActionPointsRemaining(0);
+        TimeUnit.SECONDS.sleep(1);
+        updateActionPointsRemaining(ap);
+    }
+
+    public void updateActionPointsRemaining(int ap) {
+        switch (ap) {
+            case 0 -> remainingActionPointsLabel.setIcon(new ImageIcon(actionPointImage));
+            case 1 -> remainingActionPointsLabel.setIcon(new ImageIcon(actionPointImage1));
+            case 2 -> remainingActionPointsLabel.setIcon(new ImageIcon(actionPointImage2));
+            case 3 -> remainingActionPointsLabel.setIcon(new ImageIcon(actionPointImage3));
+            case 4 -> remainingActionPointsLabel.setIcon(new ImageIcon(actionPointImage4));
+            case 5 -> remainingActionPointsLabel.setIcon(new ImageIcon(actionPointImage5));
+            case 6 -> remainingActionPointsLabel.setIcon(new ImageIcon(actionPointImage6));
+            case 7 -> remainingActionPointsLabel.setIcon(new ImageIcon(actionPointImage7));
+            case 8 -> remainingActionPointsLabel.setIcon(new ImageIcon(actionPointImage8));
+            case 9 -> remainingActionPointsLabel.setIcon(new ImageIcon(actionPointImage9));
+        }
     }
 
     public BufferedImage pieceRangeImageMap(Piece piece) {
@@ -156,6 +236,32 @@ public class RightPanel {
         }
         return null;
     }
+
+    public BufferedImage pieceNameImageMap(Piece piece) {
+        switch (piece.getType()) {
+            case CORVETTE -> {
+                return corvetteNameDisplayImage;
+            }
+            case FRIGATE -> {
+                return frigateNameDisplayImage;
+            }
+            case DESTROYER -> {
+                return destroyerNameDisplayImage;
+            }
+            case CRUISER -> {
+                return cruiserNameDisplayImage;
+            }
+            case BATTLESHIP -> {
+                return battleshipNameDisplayImage;
+            }
+            case CARRIER -> {
+                return carrierNameDisplayImage;
+            }
+        }
+        return null;
+    }
+
+
 
     public BufferedImage spritePathMap(SpriteTags spriteTag) {
         switch (spriteTag) {
@@ -203,11 +309,5 @@ public class RightPanel {
         return infoDisplay;
     }
 
-    public void updateActionPointsRemaining(int ap) {
-        switch (ap) {
-            case 1 -> remainingActionPointsLabel.setIcon(new ImageIcon(actionPointImage1));
-            case 2 -> remainingActionPointsLabel.setIcon(new ImageIcon(actionPointImage2));
-            case 3 -> remainingActionPointsLabel.setIcon(new ImageIcon(actionPointImage3));
-        }
-    }
+
 }
