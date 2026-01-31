@@ -16,7 +16,13 @@ public class BasePiece implements Piece {
 
     private Direction direction;
 
-    public BasePiece(Team team, int[] location, int armour, int attack, int attackRange, int movementRange, Direction direction) {
+    private boolean hasMoved;
+
+    private int actionCost;
+
+    private String name;
+
+    public BasePiece(Team team, int[] location, int armour, int attack, int attackRange, int movementRange, Direction direction, int actionCost, String name) {
         this.team = team;
         this.location = location;
         this.armour = armour;
@@ -25,6 +31,9 @@ public class BasePiece implements Piece {
         this.attackRange = attackRange;
         this.movementRange = movementRange;
         this.direction = null;
+        this.hasMoved = false;
+        this.actionCost = actionCost;
+        this.name = name;
         if (direction != null) {
             if (team == Team.BLACK) {
                 this.direction = Direction.SOUTH;
@@ -35,6 +44,28 @@ public class BasePiece implements Piece {
         }
     }
 
+    public boolean hasMoved() {
+        return hasMoved;
+    }
+
+    public void setHasMoved(boolean hasMoved) {
+        this.hasMoved = hasMoved;
+    }
+
+    @Override
+    public int getActionCost() {
+        return actionCost;
+    }
+
+    @Override
+    public void setActionCost(int actionCost) {
+        this.actionCost = actionCost;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
 
     @Override
     public Direction getValidDirectionChanges() {

@@ -15,20 +15,25 @@ public class GameView {
 
     private final int size = 600;
 
-    private final SidePanel directionButtons;
+    private final BottomPanel bottomPanel;
+    private final TopPanel topPanel;
+    private final RightPanel rightPanel;
 
-
+    private Color backgroundColour = new Color(150, 150, 150);
 
 
     public GameView() throws IOException {
         gameFrame = new JFrame();
-        directionButtons = new SidePanel();
-        gameFrame.setName("FlatLand 1.0a");
-        gameFrame.getContentPane().setLayout(new FlowLayout(FlowLayout.LEADING));
+        gameFrame.setBackground(backgroundColour);
+        bottomPanel = new BottomPanel();
+        topPanel = new TopPanel();
+        rightPanel = new RightPanel();
+        gameFrame.setName("Land Battle");
+        //gameFrame.getContentPane().setLayout(new FlowLayout(FlowLayout.LEADING));
         gameFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         gameFrame.setIconImage(ImageIO.read((new File("images\\battleship.png").toURI()).toURL()));
-        gameFrame.setLayout(new GridLayout());
-        gameFrame.setResizable(true);
+        gameFrame.setLayout(new GridBagLayout());
+        gameFrame.setResizable(false);
         gameFrame.setLocationRelativeTo(null);
 
         boardPanel = new JPanel() {
@@ -40,8 +45,33 @@ public class GameView {
                 g.drawImage(boardImage, x, y, this);
             }
         };
-        gameFrame.add(boardPanel);
-        gameFrame.add(directionButtons.getSidePanel());
+
+        GridBagConstraints c = new GridBagConstraints();
+
+        c.gridx = 4;
+        c.gridy = 0;
+        c.gridheight = 4;
+        c.gridwidth = 2;
+        gameFrame.add(rightPanel.getDisplayComponent(), c);
+
+        c.gridx = 0;
+        c.gridy = 0;
+        c.gridheight = 1;
+        c.gridwidth = 3;
+        gameFrame.add(topPanel.getDisplayComponent(), c);
+
+        c.gridx = 0;
+        c.gridy = 1;
+        c.gridheight = 3;
+        c.gridwidth = 3;
+        gameFrame.add(boardPanel, c);
+
+        c.gridx = 0;
+        c.gridy = 5;
+        c.gridheight = 1;
+        c.gridwidth = 3;
+
+        gameFrame.add(bottomPanel.getDisplayComponent(), c);
         boardPanel.setPreferredSize(new Dimension(size, size));
         gameFrame.pack();
 
@@ -68,9 +98,28 @@ public class GameView {
         gameFrame.setVisible(visible);
     }
 
-    public SidePanel getSidePanel() {
-        return directionButtons;
+
+    public RightPanel getRightPanel() {
+        return rightPanel;
     }
 
+    public BufferedImage getBoardImage() {
+        return boardImage;
+    }
 
+    public JPanel getBoardPanel() {
+        return boardPanel;
+    }
+
+    public void updateTurn(Team team) throws IOException {
+        BufferedImage turnIcon;
+        if (team == Team.WHITE) {
+            turnIcon = ImageIO.read(new File("images\\white_turn_bar.png"));
+        }
+        else {
+            turnIcon = ImageIO.read(new File("images\\black_turn_bar.png"));
+        }
+        bottomPanel.getDisplayComponent().setIcon(new ImageIcon(turnIcon));
+        topPanel.getDisplayComponent().setIcon(new ImageIcon(turnIcon));
+    }
 }

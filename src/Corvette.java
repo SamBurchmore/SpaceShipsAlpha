@@ -4,7 +4,7 @@ public class Corvette extends BasePiece {
 
 
     public Corvette(Team team, int[] location) {
-        super(team, location, 2, 6, 1, 3, null);
+        super(team, location, 2, 6, 1, 3, null, 1, "Corvette");
     }
 
     @Override

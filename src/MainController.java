@@ -1,3 +1,8 @@
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -8,9 +13,13 @@ import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 //import com.kong.unirest;
+import java.io.File;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 
 public class MainController {
     private final GameView gameView;
@@ -25,15 +34,19 @@ public class MainController {
     private ArrayList<Tile> attackTiles;
     public GameState gameState;
 
+    public int actionPoints = 3;
+
+    public ArrayList<Piece> movedPieces;
+
     private Color lightMoveColor = new Color(122, 122, 222);
     private Color darkMoveColor = new Color(14, 14, 94);
-    private Color lightAttackColor = new Color(150, 0, 0);
-    private Color darkAttackColor = new Color(200, 0, 0);
+    private Color darkAttackColor = new Color(150, 0, 0);
+    private Color lightAttackColor = new Color(200, 0, 0);
     private Color tileLightColor = new Color(50, 200, 20);
     private Color tileDarkColor = new Color(30, 150, 0);
 
     public MainController() throws IOException {
-
+        movedPieces = new ArrayList<>();
         gameView = new GameView();
         boardController  = new BoardController(tileLightColor, tileDarkColor);
         boardController.getBoard().setDarkColor(tileDarkColor);
@@ -47,25 +60,34 @@ public class MainController {
         gameView.setVisible(true);
         gameView.getGameFrame().addMouseListener(playLogic);
         activeTeam = Team.BLACK;
-        gameView.getSidePanel().changeTurnDisplay(activeTeam);
-
+        gameView.updateTurn(activeTeam);
     }
 
     // Groups methods which allow the game to be played .i.e control the game state, listen for input, send it to BoardLogic, update BoardImage and send the image to GameView
     public class PlayLogic implements java.awt.event.MouseListener {
 
-        public boolean setActivePiece() {
-            if (lastClickedTile.getPiece() != null) {
-                if (lastClickedTile.getPiece().getTeam() == activeTeam) {
-                    activePiece = lastClickedTile.getPiece();
-                    gameView.getSidePanel().getInfoPanel().setInfoPanelText(activePiece);
-                    return true;
+        public boolean setActivePiece() throws IOException {
+            if (lastClickedTile.getPiece() != null && !lastClickedTile.getPiece().hasMoved()) {
+                if (lastClickedTile.getPiece().getActionCost() <= actionPoints) {
+                    if (lastClickedTile.getPiece().getTeam() == activeTeam) {
+                        activePiece = lastClickedTile.getPiece();
+                        gameView.getRightPanel().getInfoPanel().setInfoPanelText(activePiece);
+                        gameView.getRightPanel().updateSelectedPiece(activePiece, boardImage.getPieceSpriteTag(activePiece));
+                        gameView.getRightPanel().updateSelectedPieceRange(activePiece);
+                        return true;
+                    }
                 }
             }
             return false;
         }
 
-        public void newTurn() {
+        public void newTurn() throws IOException {
+
+            for (Piece piece: movedPieces) {
+                piece.setHasMoved(false);
+            }
+            movedPieces.clear();
+            actionPoints = 3;
             if (activeTeam == Team.BLACK) {
                 activeTeam = Team.WHITE;
             }
@@ -74,19 +96,22 @@ public class MainController {
             }
             activePiece = null;
             gameState = GameState.WAITING_INPUT;
-            gameView.getSidePanel().getInfoPanel().clearInfoPanelText();
+            gameView.getRightPanel().getInfoPanel().clearInfoPanelText();
+            gameView.getRightPanel().clearPieceImages();
             boardImage.updateBoard();
         }
 
-        public void resetTurn() {
+        public void resetTurn() throws IOException {
             activePiece = null;
             gameState = GameState.WAITING_INPUT;
-            gameView.getSidePanel().getInfoPanel().clearInfoPanelText();
+            gameView.getRightPanel().getInfoPanel().clearInfoPanelText();
+            gameView.getRightPanel().clearPieceImages();
             boardImage.updateBoard();
         }
 
-        public void runGame() {
-            gameView.getSidePanel().getInfoPanel().clearInfoPanelText();
+        public void runGame() throws IOException {
+            gameView.getRightPanel().getInfoPanel().clearInfoPanelText();
+            gameView.getRightPanel().clearPieceImages();
             System.out.println(gameState);
             playLogic.getPointer(); // Get the mouse location
             if (gameState == GameState.PIECE_TURNING) {
@@ -115,20 +140,49 @@ public class MainController {
                     boolean actionPerformed = boardLogic.performAction();
                     if (actionPerformed) {
                         System.out.println("action performed");
-                        newTurn();
-                        gameView.getSidePanel().changeTurnDisplay(activeTeam);
+                        activePiece.setHasMoved(true);
+                        movedPieces.add(activePiece);
+                        switch (activePiece.getType()) {
+                            case CORVETTE -> {
+                                actionPoints -= 1;
+                            }
+                            case FRIGATE -> {
+                                actionPoints -= 1;
+                            }
+                            case DESTROYER -> {
+                                actionPoints -= 2;
+                            }
+                            case CRUISER -> {
+                                actionPoints -= 2;
+                            }
+                            case BATTLESHIP -> {
+                                actionPoints -= 2;
+                            }
+                            case CARRIER -> {
+                                actionPoints -= 2;
+                            }
+                        }
+                        if (actionPoints <= 0) {
+                            newTurn();
+                            gameView.updateTurn(activeTeam);
+                            gameView.getRightPanel().clearPieceImages();
+                        }
+                        else {
+                            resetTurn();
+                        }
                     }
                 }
                 System.out.println(gameState);
             }
         }
         public void setLastClickedTile(int x, int y) {
-            lastClickedTile = boardController.getBoard().getTile((x-7) / boardController.getScale(), (y-30) / boardController.getScale());
+            lastClickedTile = boardController.getBoard().getTile((x) / boardController.getScale(), (y) / boardController.getScale());
+            System.out.println(Arrays.toString(lastClickedTile.getLocation()));
         }
 
         public void getPointer() {
             Point point = MouseInfo.getPointerInfo().getLocation();
-            SwingUtilities.convertPointFromScreen(point, gameView.getGameFrame());
+            SwingUtilities.convertPointFromScreen(point, gameView.getBoardPanel());
             setLastClickedTile(point.x, point.y);
         }
 
@@ -143,7 +197,11 @@ public class MainController {
 
             }
             else {
-                runGame();
+                try {
+                    runGame();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         }
 
@@ -261,6 +319,9 @@ public class MainController {
             return null;
         }
         public boolean performAction() {
+            if (activePiece.hasMoved()) {
+                return false;
+            }
             for (Tile tile : moveTiles) {
                 if (lastClickedTile.getLocation()[0] == tile.getLocation()[0] && lastClickedTile.getLocation()[1] == tile.getLocation()[1]) {
                     move(activePiece, lastClickedTile);
@@ -271,7 +332,7 @@ public class MainController {
                 if (lastClickedTile.getLocation()[0] == tile.getLocation()[0] && lastClickedTile.getLocation()[1] == tile.getLocation()[1]) {
                     if (tile.getPiece().getTeam() != activePiece.getTeam()) {
                         ArrayList<Object> result = attack(activePiece, tile.getPiece());
-                        gameView.getSidePanel().getInfoPanel().setAttackResult(activePiece, (Piece) result.get(0), (int) result.get(1), (boolean) result.get(2), (boolean) result.get(3));
+                        gameView.getRightPanel().getInfoPanel().setAttackResult(activePiece, (Piece) result.get(0), (int) result.get(1), (boolean) result.get(2), (boolean) result.get(3));
 
                     }
                     else {
@@ -568,6 +629,7 @@ public class MainController {
             }
             catch (IOException ex) {
             }
+            gameView.getRightPanel().updateActionPointsRemaining(actionPoints);
         }
         public BufferedImage getBoardImage() {
             int size = boardController.getSize();

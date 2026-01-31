@@ -31,4 +31,14 @@ public interface Piece {
 
     void setDirection(Direction direction);
 
+    public boolean hasMoved();
+
+    public void setHasMoved(boolean hasMoved);
+
+    public int getActionCost();
+
+    public void setActionCost(int actionCost);
+
+    public String getName();
+
 }
