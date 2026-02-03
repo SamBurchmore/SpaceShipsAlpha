@@ -1,0 +1,8 @@
+package Data;
+
+public enum GameState {
+    WAITING_INPUT,
+    SINGLE_PIECE_SELECTED,
+    SELECTING_MORE_PIECES,
+    MULTIPLE_PIECES_SELECTED
+}
