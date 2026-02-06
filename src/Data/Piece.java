@@ -28,6 +28,8 @@ public interface Piece {
 
     int getAttackRange();
 
+    void setAttackRange(int attackRange);
+
     Direction getDirection();
 
     void setDirection(Direction direction);
@@ -38,9 +40,15 @@ public interface Piece {
 
     int getActionCost();
 
+    int getAttackCost();
+
     void setActionCost(int actionCost);
 
     AttackType getAttackType();
 
     long getID();
+
+    boolean isSelected();
+
+    void setSelected(boolean selected);
 }

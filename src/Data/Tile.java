@@ -18,9 +18,14 @@ public class Tile {
         setLocation(x, y);
     }
 
-    public Tile(Piece piece) {
+    public Tile(Piece piece, int x, int y) {
         setLocation(x, y);
         setPiece(piece);
+    }
+
+    public Tile(Color color, int x, int y) {
+        setLocation(x, y);
+        setColor(color);
     }
 
     public Piece getPiece() {

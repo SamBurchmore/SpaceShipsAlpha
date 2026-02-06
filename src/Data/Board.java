@@ -9,10 +9,11 @@ public class Board {
     private Color darkColor;// = new Color(0, 92, 0);
     private Tile[] tiles = new Tile[]{};
     
-    private final int size = 12;
+    private final int size;
 
 
-    public Board(Color lightColor, Color darkColor) throws IOException {
+    public Board(Color lightColor, Color darkColor, int size) throws IOException {
+        this.size = size;
         setLightColor(lightColor);
         setDarkColor(darkColor);
         Color currentColor = lightColor;
@@ -22,24 +23,29 @@ public class Board {
         for (int i = 0; i < size * size; i++) {
             this.tiles[i] = new Tile(x, y);
             this.tiles[i].setColor(currentColor);
-            if (currentColor == lightColor) {
-                currentColor = darkColor;
-            }
-            else {
-                currentColor = lightColor;
-            }
+            currentColor = swapTileColor(currentColor);
             x++;
             if (x == size) {
                 x = 0;
                 y++;
-                if (currentColor == lightColor) {
-                    currentColor = darkColor;
-                }
-                else {
-                    currentColor = lightColor;
+                if (size % 2 == 0) {
+                    currentColor = swapTileColor(currentColor);
                 }
             }
         }
+    }
+
+    public Color swapTileColor(Color color) {
+        //Random random = new Random();
+        if (color == darkColor) {
+            color = lightColor;
+        }
+        else {
+            color = darkColor;
+
+        }
+        return color;
+        //return new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255));
     }
 
     public Color getLightColor() {

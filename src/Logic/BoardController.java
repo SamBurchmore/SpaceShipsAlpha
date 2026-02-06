@@ -12,7 +12,7 @@ public class BoardController {
     private final int size = 12;
 
     public BoardController(Color lightColor, Color darkColor) throws IOException {
-        board = new Board(lightColor, darkColor);
+        board = new Board(lightColor, darkColor, 12);
         setUpBoard();
     }
 

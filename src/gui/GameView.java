@@ -24,20 +24,26 @@ public class GameView {
 
     private Color backgroundColour = new Color(200, 200, 200);
 
+    public JDialog tempDialog;
 
-    public GameView() throws IOException {
+
+
+    public GameView(BufferedImage initialMiniImage) throws IOException {
         gameFrame = new JFrame();
+        gameFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         gameFrame.setForeground(backgroundColour);
         bottomPanel = new BottomPanel();
         topPanel = new TopPanel();
-        rightPanel = new RightPanel();
+        rightPanel = new RightPanel(initialMiniImage);
         gameFrame.setName("Land Battle");
         //gameFrame.getContentPane().setLayout(new FlowLayout(FlowLayout.LEADING));
         gameFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         gameFrame.setIconImage(ImageIO.read((new File("images\\battleship.png").toURI()).toURL()));
         gameFrame.setLayout(new GridBagLayout());
-        gameFrame.setResizable(false);
-        gameFrame.setLocationRelativeTo(null);
+
+
+
+
 
         boardPanel = new JPanel() {
             @Override
@@ -109,7 +115,8 @@ public class GameView {
         gameFrame.setJMenuBar(menuBar);
 
         gameFrame.pack();
-
+        gameFrame.setResizable(false);
+        gameFrame.setLocationRelativeTo(null);
     }
 
     public JFrame getGameFrame() {

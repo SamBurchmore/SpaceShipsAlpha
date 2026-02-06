@@ -2,6 +2,7 @@ package gui;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -20,6 +21,8 @@ public class RightPanel {
     private JLabel remainingActionPointsLabel;
 
     private JLabel pieceNameLabel;
+
+    private MiniImage miniImage;
 
 
     private BufferedImage actionPointImage;
@@ -61,7 +64,7 @@ public class RightPanel {
     private BufferedImage blankNameDisplayImage;
 
     private final Color backgroundColour = new Color(200, 200, 200);
-    public RightPanel() throws IOException {
+    public RightPanel(BufferedImage initialMiniImage) throws IOException {
         loadImages();
         rightPanel = new JPanel();
         rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.Y_AXIS));
@@ -80,6 +83,8 @@ public class RightPanel {
         pieceRangeImage.setIcon(new ImageIcon(blankRangeDisplay));
         pieceImage.setIcon(new ImageIcon(blankPieceImage));
 
+        miniImage = new MiniImage(initialMiniImage);
+
         pieceNameLabel.setIcon(new ImageIcon(blankNameDisplayImage));
         JPanel pieceNamePanel = new JPanel();
         pieceNamePanel.add(pieceNameLabel);
@@ -88,10 +93,14 @@ public class RightPanel {
         JPanel pieceImagePanel = new JPanel();
         pieceImagePanel.add(pieceImage);
         piecePanel.add(pieceImagePanel);
+        //piecePanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+
 
         JPanel pieceRangeImagePanel = new JPanel();
-        pieceRangeImagePanel.add(pieceRangeImage);
+        pieceRangeImagePanel.add(miniImage.getDisplayComponent());
+        miniImage.getDisplayComponent().setPreferredSize(new Dimension(220, 220));
         piecePanel.add(pieceRangeImagePanel);
+
 
         rightPanel.add(piecePanel);
 
@@ -113,8 +122,7 @@ public class RightPanel {
 
         pieceNamePanel.setPreferredSize(new Dimension(350, 35));
         remainingActionPointsPanel.setPreferredSize(new Dimension(260, 100));
-        pieceImagePanel.setPreferredSize(new Dimension(220, 230));
-        pieceRangeImagePanel.setPreferredSize(new Dimension(260, 300));
+        pieceImagePanel.setPreferredSize(new Dimension(220, 240));
         piecePanel.setPreferredSize(new Dimension(260, 600));
 
         remainingActionPointsPanel.setPreferredSize(new Dimension(350, 110));
@@ -180,6 +188,10 @@ public class RightPanel {
         return rightPanel;
     }
 
+    public MiniImage getMiniImage() {
+        return miniImage;
+    }
+
     public void updateSelectedPiece(Piece piece, SpriteTags spriteTag) {
         pieceImage.setIcon(new ImageIcon(spritePathMap(spriteTag)));
         pieceNameLabel.setIcon(new ImageIcon(pieceNameImageMap(piece)));
@@ -193,6 +205,7 @@ public class RightPanel {
         pieceImage.setIcon(new ImageIcon(blankPieceImage));
         pieceRangeImage.setIcon(new ImageIcon(blankRangeDisplay));
         pieceNameLabel.setIcon(new ImageIcon(blankNameDisplayImage));
+        miniImage.clearImage();
     }
 
     public void resetActionPointAnimation(int ap) throws InterruptedException {

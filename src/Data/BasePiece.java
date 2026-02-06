@@ -14,7 +14,7 @@ public class BasePiece implements Piece {
 
     private final int movementRange;
 
-    private final int attackRange;
+    private int attackRange;
 
     private Direction direction;
 
@@ -22,11 +22,14 @@ public class BasePiece implements Piece {
 
     private int actionCost;
 
+    private int attackCost;
     private AttackType attackType;
+
+    private boolean selected;
 
     long id;
 
-    public BasePiece(Team team, int[] location, int armour, int attack, int attackRange, int movementRange, Direction direction, int actionCost, AttackType attackType) {
+    public BasePiece(Team team, int[] location, int armour, int attack, int attackRange, int movementRange, Direction direction, int actionCost, AttackType attackType, int attackCost) {
         this.team = team;
         this.location = location;
         this.armour = armour;
@@ -38,6 +41,7 @@ public class BasePiece implements Piece {
         this.hasMoved = false;
         this.actionCost = actionCost;
         this.attackType = attackType;
+        this.attackCost = attackCost;
         if (direction != null) {
             if (team == Team.BLACK) {
                 this.direction = Direction.SOUTH;
@@ -63,6 +67,11 @@ public class BasePiece implements Piece {
     }
 
     @Override
+    public int getAttackCost() {
+        return attackCost;
+    }
+
+    @Override
     public void setActionCost(int actionCost) {
         this.actionCost = actionCost;
     }
@@ -76,6 +85,16 @@ public class BasePiece implements Piece {
     @Override
     public long getID() {
         return id;
+    }
+
+    @Override
+    public boolean isSelected() {
+        return selected;
+    }
+
+    @Override
+    public void setSelected(boolean selected) {
+        this.selected = selected;
     }
 
     @Override
@@ -136,6 +155,11 @@ public class BasePiece implements Piece {
     @Override
     public int getAttackRange() {
         return attackRange;
+    }
+
+    @Override
+    public void setAttackRange(int attackRange) {
+        this.attackRange = attackRange;
     }
 
     @Override
