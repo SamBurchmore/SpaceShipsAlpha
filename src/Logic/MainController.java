@@ -45,12 +45,18 @@ public class MainController {
     private Color darkMoveColor = new Color(14, 14, 94);
     private Color darkAttackColor = new Color(150, 0, 0);
     private Color lightAttackColor = new Color(200, 0, 0);
-    private Color lightTeamMemberColor = new Color(230, 230, 0);
-    private Color darkTeamMemberColor = new Color(200, 200, 0);
-    private Color lightAttackingTeamMemberColor = new Color(200, 0, 200);
-    private Color darkAttackingTeamMemberColor = new Color(150, 0, 150);
-    private Color lightTileColor = new Color(50, 200, 20);
-    private Color darkTileColor = new Color(30, 150, 0);
+//    private Color lightTeamMemberColor = new Color(230, 230, 0);
+//    private Color darkTeamMemberColor = new Color(200, 200, 0);
+private Color lightTeamMemberColor = new Color(0, 255, 0);
+    private Color darkTeamMemberColor = new Color(0, 200, 0);
+//    private Color lightAttackingTeamMemberColor = new Color(200, 0, 200);
+//    private Color darkAttackingTeamMemberColor = new Color(150, 0, 150);
+private Color lightAttackingTeamMemberColor = new Color(0, 255, 255);
+    private Color darkAttackingTeamMemberColor = new Color(0, 200, 200);
+//    private Color lightTileColor = new Color(50, 200, 20);
+//    private Color darkTileColor = new Color(30, 150, 0);
+private Color lightTileColor = new Color(200, 200, 200);
+    private Color darkTileColor = new Color(70, 70, 70);
 
     public Color[] actionColors = new Color[]{lightAttackColor, darkAttackColor, lightMoveColor, darkMoveColor, lightTeamMemberColor, darkTeamMemberColor, lightAttackingTeamMemberColor, darkAttackingTeamMemberColor};
     Map<String, Color> tileColorMap = Map.of(
@@ -91,7 +97,27 @@ public class MainController {
         gameView.updateTurn(activeTeam);
         deleteLoadingDialog();
 
-        //debugMode();
+        debugMode();
+    }
+
+    public GameView getGameView() {
+        return gameView;
+    }
+
+    public BoardController getBoardController() {
+        return boardController;
+    }
+
+    public BoardImage getBoardImage() {
+        return boardImage;
+    }
+
+    public BoardLogic getBoardLogic() {
+        return boardLogic;
+    }
+
+    public PlayLogic getPlayLogic() {
+        return playLogic;
     }
 
     private void debugMode() {
@@ -130,6 +156,7 @@ public class MainController {
         loadingDialog.dispose();
     }
 
+
     // Groups methods which allow the game to be played .i.e control the game state, listen for input, send it to BoardLogic, update BoardImage and send the image to gui.GameView
     public class PlayLogic implements java.awt.event.MouseListener {
 
@@ -159,6 +186,8 @@ public class MainController {
             }
             return "no_action";
         }
+
+        
 
         public void newTurn() throws IOException, InterruptedException {
             for (Piece piece: movedPieces) {
@@ -1009,6 +1038,11 @@ public class MainController {
             lastBoardImage = BoardImage.deepCopy(blankBoardImage);
         }
 
+        public void resetBoardImage() {
+            blankBoard(boardController.getScale());
+            lastBoardImage = BoardImage.deepCopy(blankBoardImage);
+        }
+
         public void displayActions() {
             lastBoardImage = BoardImage.deepCopy(blankBoardImage);
             gameView.updateBoard(boardImage.getBoardImage());
@@ -1066,15 +1100,16 @@ public class MainController {
                                 for (int j = 0; j < scale; j++) {
                                     if (((x + i < scale * size) && (y + j < scale * size)) && ((x + i >= 0) && (y + j >= 0))) {
                                         Tile tile = boardController.getBoard().getTile(x / scale, y / scale);
-                                        Color rgba = new Color(sprites.get(getPieceSpriteTag(tile.getPiece())).getRGB(i, j), true);
-                                        if (rgba.getAlpha() == 255) {
-                                            if (tile.getPiece().getDamaged()) {
-                                                if (i % 3 == 0 || j % 2 == 0) {
+                                        if (tile.getPiece() != null) {
+                                            Color rgba = new Color(sprites.get(getPieceSpriteTag(tile.getPiece())).getRGB(i, j), true);
+                                            if (rgba.getAlpha() == 255) {
+                                                if (tile.getPiece().getDamaged()) {
+                                                    if (i % 3 == 0 || j % 2 == 0) {
+                                                        lastBoardImage.setRGB(x + i, y + j, rgba.getRGB());
+                                                    }
+                                                } else {
                                                     lastBoardImage.setRGB(x + i, y + j, rgba.getRGB());
                                                 }
-                                            }
-                                            else {
-                                                lastBoardImage.setRGB(x + i, y + j, rgba.getRGB());
                                             }
                                         }
                                     }

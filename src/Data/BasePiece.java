@@ -53,6 +53,8 @@ public class BasePiece implements Piece {
         this.id = System.nanoTime();
     }
 
+
+
     public boolean hasMoved() {
         return hasMoved;
     }

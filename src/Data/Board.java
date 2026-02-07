@@ -12,7 +12,7 @@ public class Board {
     private final int size;
 
 
-    public Board(Color lightColor, Color darkColor, int size) throws IOException {
+    public Board(Color lightColor, Color darkColor, int size) {
         this.size = size;
         setLightColor(lightColor);
         setDarkColor(darkColor);
@@ -34,6 +34,7 @@ public class Board {
             }
         }
     }
+
 
     public Color swapTileColor(Color color) {
         //Random random = new Random();

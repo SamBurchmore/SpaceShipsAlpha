@@ -60,6 +60,10 @@ public class BoardController {
         return pieces;
     }
 
+    public void setBoard(Board board) {
+        this.board = board;
+    }
+
     public void setUpBoard() {
         board.setTile(2, 1, pieceFactory(PieceType.FRIGATE, Team.BLACK, 2, 1));
         board.setTile(3, 1, pieceFactory(PieceType.CORVETTE, Team.BLACK, 3, 1));
