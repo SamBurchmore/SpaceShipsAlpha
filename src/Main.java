@@ -5,15 +5,14 @@ import Logic.MainController;
 
 import java.awt.*;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
     public static void main(String[] args) throws IOException, InterruptedException {
         MainController mainController = new MainController();
-//        AutoPlay autoPlay = new AutoPlay(mainController);
-//        BoardState boardState = autoPlay.getBoardState(mainController.getBoardController().getBoard());
-//        Board board = autoPlay.getBoard(boardState, Color.green, Color.blue);
-//        mainController.getBoardController().setBoard(board);
-//        mainController.getBoardImage().resetBoardImage();
-//        mainController.getGameView().updateBoard(mainController.getBoardImage().getBoardImage());
+        AutoPlay autoPlay = new AutoPlay(mainController);
+        autoPlay.nextStates(mainController.getGame().deepCopy(), mainController.getGame(), 5000);
+
     }
 }

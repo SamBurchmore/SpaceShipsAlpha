@@ -11,9 +11,12 @@ public class BoardController {
     private int scale = 50;
     private final int size = 12;
 
+    public PieceList whiteTeam;
+
+    public PieceList blackTeam;
+
     public BoardController(Color lightColor, Color darkColor) throws IOException {
         board = new Board(lightColor, darkColor, 12);
-        setUpBoard();
     }
 
     public Board getBoard() {
@@ -44,8 +47,16 @@ public class BoardController {
         return null;
     }
 
-    public ArrayList<Tile> getPiecesOnBoard(Team team) {
-        ArrayList<Tile> pieces = new ArrayList<>();
+    public Tile getTile(int[] location) {
+        return board.tiles[location[1] * size + location[0]];
+    }
+
+    public void setTile(int[] location, Piece piece) {
+        board.tiles[location[1] * size + location[0]].setPiece(piece);
+    }
+
+    public TileList getPiecesOnBoard(Team team) {
+        TileList pieces = new TileList();
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 Piece piece = board.getTile(i, j).getPiece();
@@ -64,45 +75,45 @@ public class BoardController {
         this.board = board;
     }
 
-    public void setUpBoard() {
-        board.setTile(2, 1, pieceFactory(PieceType.FRIGATE, Team.BLACK, 2, 1));
-        board.setTile(3, 1, pieceFactory(PieceType.CORVETTE, Team.BLACK, 3, 1));
-        board.setTile(4, 1, pieceFactory(PieceType.CORVETTE, Team.BLACK, 4, 1));
-        board.setTile(5, 1, pieceFactory(PieceType.CORVETTE, Team.BLACK, 5, 1));
-        board.setTile(6, 1, pieceFactory(PieceType.CORVETTE, Team.BLACK, 6, 1));
-        board.setTile(7, 1, pieceFactory(PieceType.CORVETTE, Team.BLACK, 7, 1));
-        board.setTile(8, 1, pieceFactory(PieceType.CORVETTE, Team.BLACK, 8, 1));
-        board.setTile(9, 1, pieceFactory(PieceType.FRIGATE, Team.BLACK, 9, 1));
-        board.setTile(2, 0, pieceFactory(PieceType.FRIGATE, Team.BLACK, 2, 0));
-        board.setTile(3, 0, pieceFactory(PieceType.CRUISER, Team.BLACK, 3, 0));
-        board.setTile(4, 0, pieceFactory(PieceType.DESTROYER, Team.BLACK, 4, 0));
-        board.setTile(5, 0, pieceFactory(PieceType.BATTLESHIP, Team.BLACK, 5, 0));
-        board.setTile(6, 0, pieceFactory(PieceType.CARRIER, Team.BLACK, 6, 0));
-        board.setTile(7, 0, pieceFactory(PieceType.DESTROYER, Team.BLACK, 7, 0));
-        board.setTile(8, 0, pieceFactory(PieceType.CRUISER, Team.BLACK, 8, 0));
-        board.setTile(9, 0, pieceFactory(PieceType.FRIGATE, Team.BLACK, 9, 0));
-
-
-        board.setTile(2, 10, pieceFactory(PieceType.FRIGATE, Team.WHITE, 2, 10));
-        board.setTile(3, 10, pieceFactory(PieceType.CORVETTE, Team.WHITE, 3, 10));
-        board.setTile(4, 10, pieceFactory(PieceType.CORVETTE, Team.WHITE, 4, 10));
-        board.setTile(5, 10, pieceFactory(PieceType.CORVETTE, Team.WHITE, 5, 10));
-        board.setTile(6, 10, pieceFactory(PieceType.CORVETTE, Team.WHITE, 6, 10));
-        board.setTile(7, 10, pieceFactory(PieceType.CORVETTE, Team.WHITE, 7, 10));
-        board.setTile(8, 10, pieceFactory(PieceType.CORVETTE, Team.WHITE, 8, 10));
-        board.setTile(9, 10, pieceFactory(PieceType.FRIGATE, Team.WHITE, 9, 10));
-        board.setTile(2, 11, pieceFactory(PieceType.FRIGATE, Team.WHITE, 2, 11));
-        board.setTile(3, 11, pieceFactory(PieceType.CRUISER, Team.WHITE, 3, 11));
-        board.setTile(4, 11, pieceFactory(PieceType.DESTROYER, Team.WHITE, 4, 11));
-        board.setTile(5, 11, pieceFactory(PieceType.BATTLESHIP, Team.WHITE, 5, 11));
-        board.setTile(6, 11, pieceFactory(PieceType.CARRIER, Team.WHITE, 6, 11));
-        board.setTile(7, 11, pieceFactory(PieceType.DESTROYER, Team.WHITE, 7, 11));
-        board.setTile(8, 11, pieceFactory(PieceType.CRUISER, Team.WHITE, 8, 11));
-        board.setTile(9, 11, pieceFactory(PieceType.FRIGATE, Team.WHITE, 9, 11));
-
+    public void setUpBoard(ArrayList<int[]> pieceData, Team team) {
+        PieceList pieces = new PieceList();
+        for (int[] data : pieceData) {
+            Piece piece = pieceFactory(PieceType.values()[data[0]], team, data[1], data[2]);
+            board.setTile(data[1], data[2], piece);
+            pieces.add(piece);
+        }
+        if (team == Team.BLACK) {
+            blackTeam = pieces;
+        }
+        else {
+            whiteTeam = pieces;
+        }
     }
 
+    public void removePiece(Piece piece) {
+        if (piece.getTeam() == Team.BLACK) {
+            blackTeam.remove(piece);
+        }
+        else {
+            whiteTeam.remove(piece);
+        }
+        board.setTile(piece.getLocation()[0], piece.getLocation()[1], null);
+    }
 
+    public PieceList getTeam(Team team) {
+        if (team == Team.BLACK) {
+            return blackTeam;
+        }
+        return whiteTeam;
+    }
+
+    public PieceList getWhiteTeam() {
+        return whiteTeam;
+    }
+
+    public PieceList getBlackTeam() {
+        return blackTeam;
+    }
 
     public int getScale() {
         return scale;

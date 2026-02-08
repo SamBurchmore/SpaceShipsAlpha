@@ -12,4 +12,12 @@ public class Frigate extends BasePiece {
         return PieceType.FRIGATE;
     }
 
+    public Frigate deepCopy() {
+        Frigate frigate = new Frigate(this.getTeam(), new int[]{this.getLocation()[0], this.getLocation()[1]});
+        frigate.setHasMoved(this.hasMoved());
+        frigate.setDamaged(this.getDamaged());
+        frigate.setDirection(this.getDirection());
+        return frigate;
+    }
+
 }

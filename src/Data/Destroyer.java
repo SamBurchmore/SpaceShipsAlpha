@@ -12,4 +12,11 @@ public class Destroyer extends BasePiece {
         return PieceType.DESTROYER;
     }
 
+    public Destroyer deepCopy() {
+        Destroyer destroyer = new Destroyer(this.getTeam(), new int[]{this.getLocation()[0], this.getLocation()[1]});
+        destroyer.setHasMoved(this.hasMoved());
+        destroyer.setDamaged(this.getDamaged());
+        return destroyer;
+    }
+
 }

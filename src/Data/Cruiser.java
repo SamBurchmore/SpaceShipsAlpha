@@ -12,4 +12,12 @@ public class Cruiser extends BasePiece {
         return PieceType.CRUISER;
     }
 
+    public Cruiser deepCopy() {
+        Cruiser cruiser = new Cruiser(this.getTeam(), new int[]{this.getLocation()[0], this.getLocation()[1]});
+        cruiser.setHasMoved(this.hasMoved());
+        cruiser.setDamaged(this.getDamaged());
+        cruiser.setDirection(this.getDirection());
+        return cruiser;
+    }
+
 }

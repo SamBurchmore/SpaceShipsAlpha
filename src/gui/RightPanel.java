@@ -157,12 +157,12 @@ public class RightPanel {
         actionPointImage9 = ImageIO.read(new File("images\\actionPointPanels\\actionPointPanel9.png"));
         blankRangeDisplay = ImageIO.read(new File("images\\blank_range_display.png"));
         blankPieceImage = ImageIO.read(new File("images\\blank_piece.png"));
-        corvetteRangeImage = ImageIO.read(new File("images\\corvette_range_display.png"));
-        frigateRangeImage = ImageIO.read(new File("images\\frigate_range_display.png"));
-        destroyerRangeImage = ImageIO.read(new File("images\\destroyer_range_display.png"));
-        cruiserRangeImage = ImageIO.read(new File("images\\cruiser_range_display.png"));
-        battleshipRangeImage = ImageIO.read(new File("images\\battleship_range_display.png"));
-        carrierRangeImage = ImageIO.read(new File("images\\carrier_range_display.png"));
+//        corvetteRangeImage = ImageIO.read(new File("images\\corvette_range_display.png"));
+//        frigateRangeImage = ImageIO.read(new File("images\\frigate_range_display.png"));
+//        destroyerRangeImage = ImageIO.read(new File("images\\destroyer_range_display.png"));
+//        cruiserRangeImage = ImageIO.read(new File("images\\cruiser_range_display.png"));
+//        battleshipRangeImage = ImageIO.read(new File("images\\battleship_range_display.png"));
+//        carrierRangeImage = ImageIO.read(new File("images\\carrier_range_display.png"));
         whiteCorvetteDisplayImage = ImageIO.read(new File("images\\big_corvette_white.png"));
         whiteFrigateDisplayImage = ImageIO.read(new File("images\\big_frigate_white.png"));
         whiteDestroyerDisplayImage = ImageIO.read(new File("images\\big_destroyer_white.png"));
@@ -199,7 +199,7 @@ public class RightPanel {
     }
 
     public void updateSelectedPieceRange(Piece piece) {
-        pieceRangeImage.setIcon(new ImageIcon(pieceRangeImageMap(piece)));
+        pieceRangeImage.setIcon(new ImageIcon(blankRangeDisplay));
     }
     public void clearPieceImages() {
         pieceImage.setIcon(new ImageIcon(blankPieceImage));

@@ -11,4 +11,11 @@ public class Corvette extends BasePiece {
         return PieceType.CORVETTE;
     }
 
+    public Corvette deepCopy() {
+        Corvette corvette = new Corvette(this.getTeam(), new int[]{this.getLocation()[0], this.getLocation()[1]});
+        corvette.setHasMoved(this.hasMoved());
+        corvette.setDamaged(this.getDamaged());
+        return corvette;
+    }
+
 }

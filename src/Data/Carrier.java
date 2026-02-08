@@ -12,4 +12,11 @@ public class Carrier extends BasePiece {
         return PieceType.CARRIER;
     }
 
+    public Carrier deepCopy() {
+        Carrier carrier = new Carrier(this.getTeam(), new int[]{this.getLocation()[0], this.getLocation()[1]});
+        carrier.setHasMoved(this.hasMoved());
+        carrier.setDamaged(this.getDamaged());
+        return carrier;
+    }
+
 }

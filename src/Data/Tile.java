@@ -6,9 +6,9 @@ public class Tile {
 
     private Piece piece = null;
 
-    private int x;
+    public int x;
 
-    private int y;
+    public int y;
 
     private Color color;
 
@@ -18,9 +18,10 @@ public class Tile {
         setLocation(x, y);
     }
 
-    public Tile(Piece piece, int x, int y) {
+    public Tile(Color color, Piece piece, int x, int y) {
         setLocation(x, y);
         setPiece(piece);
+        setColor(color);
     }
 
     public Tile(Color color, int x, int y) {
@@ -28,9 +29,20 @@ public class Tile {
         setColor(color);
     }
 
+
+    public Tile deepCopy() {
+        if (this.piece == null) {
+            return new Tile(this.getColor(), null, this.x, this.y);
+        }
+        return new Tile(this.getColor(), this.getPiece().deepCopy(), this.x, this.y);
+    }
+
+
+
     public Piece getPiece() {
         return piece;
     }
+
 
     public void setPiece(Piece piece) {
         this.piece = piece;

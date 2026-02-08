@@ -7,7 +7,7 @@ import java.io.IOException;
 public class Board {
     private Color lightColor;// = new Color(0, 122, 0);
     private Color darkColor;// = new Color(0, 92, 0);
-    private Tile[] tiles = new Tile[]{};
+    public Tile[] tiles = new Tile[]{};
     
     private final int size;
 
@@ -31,6 +31,43 @@ public class Board {
                 if (size % 2 == 0) {
                     currentColor = swapTileColor(currentColor);
                 }
+            }
+        }
+    }
+
+    public Board deepCopy() {
+        Board boardCopy = new Board(lightColor, darkColor, size);
+        int x = 0;
+        int y = 0;
+        for (int i = 0; i < size * size; i++) {
+            if (this.getTile(x, y).getPiece() != null) {
+                boardCopy.tiles[i] = new Tile(this.getTile(x, y).getColor(), this.getTile(x, y).getPiece().deepCopy(), x, y);
+            }
+            else {
+                boardCopy.tiles[i] = new Tile(this.getTile(x, y).getColor(), null, x, y);
+            }
+            x++;
+            if (x == size) {
+                x = 0;
+                y++;
+            }
+        }
+        return boardCopy;
+    }
+
+    public Board(int size) {
+        this.size = size;
+        setLightColor(lightColor);
+        setDarkColor(darkColor);
+        this.tiles = new Tile[size * size];
+        int x = 0;
+        int y = 0;
+        for (int i = 0; i < size * size; i++) {
+            this.tiles[i] = new Tile(x, y);
+            x++;
+            if (x == size) {
+                x = 0;
+                y++;
             }
         }
     }
@@ -71,6 +108,10 @@ public class Board {
 
     public void setTile(int x, int y, Piece piece) {
         tiles[y * size + x].setPiece(piece);
+    }
+
+    public void setTile(Tile tile) {
+        tiles[tile.y * size + tile.x] = tile;
     }
 
     public int getSize() {

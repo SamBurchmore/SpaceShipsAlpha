@@ -56,7 +56,10 @@ public class BasePiece implements Piece {
 
 
     public boolean hasMoved() {
-        return hasMoved;
+        if (hasMoved) {
+            return true;
+        }
+        return false;
     }
 
     public void setHasMoved(boolean hasMoved) {
@@ -100,6 +103,16 @@ public class BasePiece implements Piece {
     }
 
     @Override
+    public Piece deepCopy() {
+        return null;
+    }
+
+//    @Override
+//    public boolean equals(Piece piece) {
+//        return piece.getID() == piece.getID();
+//    }
+
+    @Override
     public Direction getValidDirectionChanges() {
         return null;
     }
@@ -141,7 +154,10 @@ public class BasePiece implements Piece {
 
     @Override
     public boolean getDamaged() {
-        return damaged;
+        if (damaged) {
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -166,7 +182,26 @@ public class BasePiece implements Piece {
 
     @Override
     public Direction getDirection() {
-        return direction;
+        if (direction == null) {
+            return null;
+        }
+        switch (direction) {
+            case NORTH -> {
+                return Direction.NORTH;
+            }
+            case SOUTH -> {
+                return Direction.SOUTH;
+            }
+            case EAST -> {
+                return Direction.EAST;
+            }
+            case WEST -> {
+                return Direction.WEST;
+            }
+            default -> {
+                return null;
+            }
+        }
     }
 
     @Override

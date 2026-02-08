@@ -27,7 +27,7 @@ public class MiniImage {
                 super.paintComponent(g);
                 //int x = (miniBoardImage.getWidth(null) - miniBoardImage.getWidth(null)) / 2;
                 //int y = (miniBoardImage.getWidth(null) - miniBoardImage.getHeight(null)) / 2;
-                g.drawImage(miniBoardImage, 25, 25, this);
+                g.drawImage(miniBoardImage, 26, 26, this);
                 g.drawImage(border, 0, 0, this);
 
             }

@@ -12,4 +12,11 @@ public class Battleship extends BasePiece {
         return PieceType.BATTLESHIP;
     }
 
+    public Battleship deepCopy() {
+        Battleship battleship = new Battleship(this.getTeam(), new int[]{this.getLocation()[0], this.getLocation()[1]});
+        battleship.setHasMoved(this.hasMoved());
+        battleship.setDamaged(this.getDamaged());
+        return battleship;
+    }
+
 }

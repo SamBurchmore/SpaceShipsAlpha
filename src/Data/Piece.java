@@ -51,4 +51,8 @@ public interface Piece {
     boolean isSelected();
 
     void setSelected(boolean selected);
+
+    Piece deepCopy();
+
+//    boolean equals(Piece piece);
 }
